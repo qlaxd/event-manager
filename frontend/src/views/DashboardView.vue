@@ -476,6 +476,13 @@ const handleMonthChanged = (month: number, year: number) => {
   // For example, load events for the new month, update analytics, etc.
 }
 
+const handleLogout = () => {
+  console.log('Logout clicked')
+  // Add logout logic here
+  // For example: authStore.logout() then router.push('/login')
+  router.push('/login')
+}
+
 onMounted(() => {
   // Initialize component
 })

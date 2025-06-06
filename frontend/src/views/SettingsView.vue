@@ -1,67 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo and Title -->
-          <div class="flex items-center">
-            <div class="flex-shrink-0 flex items-center">
-              <svg class="h-8 w-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M8 7V3a4 4 0 118 0v4m-4 6v6m-4-6h8m-8 0a2 2 0 00-2 2v4a2 2 0 002 2h8a2 2 0 002-2v-4a2 2 0 00-2-2" />
-              </svg>
-              <span class="text-xl font-semibold text-gray-900">EventManager</span>
-            </div>
-          </div>
+    <!-- Main Layout Container -->
+    <div class="flex h-screen">
+      <!-- Left Sidebar -->
+      <Sidebar 
+        :user="user" 
+        @logout="handleLogout" 
+      />
 
-          <!-- Navigation -->
-          <nav class="hidden md:flex space-x-8">
-            <router-link 
-              to="/dashboard" 
-              class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Dashboard
-            </router-link>
-            <router-link 
-              to="/events" 
-              class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Events
-            </router-link>
-            <router-link 
-              to="/settings" 
-              class="text-gray-900 bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Settings
-            </router-link>
-          </nav>
-
-          <!-- User Menu -->
-          <div class="flex items-center">
-            <Dropdown position="bottom-right">
-              <template #trigger>
-                <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </template>
-              <DropdownItem text="Profile" @click="() => {}" />
-              <DropdownItem text="Sign out" variant="danger" @click="handleLogout" />
-            </Dropdown>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
         <!-- Page Header -->
         <div class="mb-8">
@@ -215,6 +164,7 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </div>
@@ -342,6 +292,7 @@
         :message="notification.message"
         @close="hideNotification"
       />
+      </div>
     </div>
   </div>
 </template>
@@ -353,6 +304,7 @@ import { useAuthStore } from '@/stores/auth'
 import userService from '@/services/user'
 import authService from '@/services/auth'
 import { Button, Input, Modal, Dropdown, DropdownItem, Alert } from '@/components/ui'
+import Sidebar from '@/components/ui/Sidebar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
