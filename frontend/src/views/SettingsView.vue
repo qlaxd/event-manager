@@ -303,8 +303,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import userService from '@/services/user'
 import authService from '@/services/auth'
-import { Button, Input, Modal, Dropdown, DropdownItem, Alert } from '@/components/ui'
-import Sidebar from '@/components/ui/Sidebar.vue'
+import { Button, Input, Modal, Dropdown, DropdownItem, Alert, Sidebar } from '@/components/ui'
 
 const router = useRouter()
 const authStore = useAuthStore()

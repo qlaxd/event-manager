@@ -329,7 +329,7 @@ import Modal from '@/components/ui/Modal.vue'
 import Dropdown from '@/components/ui/Dropdown.vue'
 import DropdownItem from '@/components/ui/DropdownItem.vue'
 import Calendar from '@/components/ui/Calendar.vue'
-import Sidebar from '@/components/ui/Sidebar.vue'
+import { Sidebar } from '@/components/ui'
 import { RouterLink } from 'vue-router'
 
 const router = useRouter()
