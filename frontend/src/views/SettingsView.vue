@@ -1,15 +1,36 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+      <div class="flex items-center justify-between px-4 py-3">
+        <button
+          @click="sidebarOpen = true"
+          class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+        >
+          <Bars3Icon class="w-6 h-6" />
+        </button>
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white rounded-lg">
+            <CalendarIcon class="w-5 h-5" />
+          </div>
+          <h1 class="ml-3 text-lg font-bold text-gray-900">EventManager</h1>
+        </div>
+        <div class="w-10"></div> <!-- Spacer for balance -->
+      </div>
+    </header>
+
     <!-- Main Layout Container -->
-    <div class="flex h-screen">
+    <div class="flex h-screen lg:h-screen">
       <!-- Left Sidebar -->
       <Sidebar 
         :user="user" 
-        @logout="handleLogout" 
+        :is-open="sidebarOpen"
+        @logout="handleLogout"
+        @close="sidebarOpen = false"
       />
 
       <!-- Main Content -->
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto w-full">
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
         <!-- Page Header -->
@@ -304,12 +325,14 @@ import { useAuthStore } from '@/stores/auth'
 import userService from '@/services/user'
 import authService from '@/services/auth'
 import { Button, Input, Modal, Dropdown, DropdownItem, Alert, Sidebar } from '@/components/ui'
+import { CalendarIcon, Bars3Icon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 // Reactive data
 const { user } = authStore
+const sidebarOpen = ref(false)
 
 // Profile form
 const profileForm = reactive({

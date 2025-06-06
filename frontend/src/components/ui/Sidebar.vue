@@ -1,17 +1,42 @@
 <template>
-  <aside class="w-64 bg-white shadow-lg flex flex-col">
+  <!-- Mobile Sidebar Overlay -->
+  <div
+    v-if="isOpen && isMobile"
+    class="fixed inset-0 z-40 lg:hidden"
+    @click="$emit('close')"
+  >
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside 
+    :class="[
+      'bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out',
+      'fixed inset-y-0 left-0 z-50 w-64 lg:static lg:inset-0 lg:translate-x-0',
+      isOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'
+    ]"
+  >
     <!-- Logo/Brand -->
     <div class="px-6 py-4 border-b border-gray-200">
-      <div class="flex items-center">
-        <div class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white rounded-lg">
-          <CalendarIcon class="w-5 h-5" />
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white rounded-lg">
+            <CalendarIcon class="w-5 h-5" />
+          </div>
+          <h1 class="ml-3 text-xl font-bold text-gray-900">EventManager</h1>
         </div>
-        <h1 class="ml-3 text-xl font-bold text-gray-900">EventManager</h1>
+        <!-- Close button for mobile -->
+        <button
+          @click="$emit('close')"
+          class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+        >
+          <XMarkIcon class="w-5 h-5" />
+        </button>
       </div>
     </div>
 
     <!-- Navigation Menu -->
-    <nav class="flex-1 px-4 py-6 space-y-2">
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
       <RouterLink
         v-for="item in navigationItems"
         :key="item.name"
@@ -22,9 +47,10 @@
             ? 'bg-gray-900 text-white' 
             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
         ]"
+        @click="handleNavClick"
       >
-        <component :is="item.icon" class="w-5 h-5 mr-3" />
-        {{ item.name }}
+        <component :is="item.icon" class="w-5 h-5 mr-3 flex-shrink-0" />
+        <span class="truncate">{{ item.name }}</span>
       </RouterLink>
     </nav>
 
@@ -32,12 +58,12 @@
     <div class="px-4 py-4 border-t border-gray-200">
       <Menu as="div" class="relative">
         <MenuButton class="flex items-center w-full px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100">
-          <UserCircleIcon class="w-8 h-8 mr-3" />
-          <div class="text-left">
-            <p class="text-sm font-medium text-gray-900">{{ user?.full_name || 'User' }}</p>
-            <p class="text-xs text-gray-500">{{ user?.email || 'user@example.com' }}</p>
+          <UserCircleIcon class="w-8 h-8 mr-3 flex-shrink-0" />
+          <div class="text-left min-w-0 flex-1">
+            <p class="text-sm font-medium text-gray-900 truncate">{{ user?.full_name || 'User' }}</p>
+            <p class="text-xs text-gray-500 truncate">{{ user?.email || 'user@example.com' }}</p>
           </div>
-          <ChevronUpDownIcon class="w-4 h-4 ml-auto" />
+          <ChevronUpDownIcon class="w-4 h-4 ml-2 flex-shrink-0" />
         </MenuButton>
         <transition
           enter-active-class="transition duration-100 ease-out"
@@ -55,6 +81,7 @@
                   active ? 'bg-gray-100' : '',
                   'flex items-center px-3 py-2 text-sm text-gray-700'
                 ]"
+                @click="handleNavClick"
               >
                 <UserIcon class="w-4 h-4 mr-2" />
                 Profile
@@ -62,7 +89,7 @@
             </MenuItem>
             <MenuItem v-slot="{ active }">
               <button
-                @click="$emit('logout')"
+                @click="handleLogout"
                 :class="[
                   active ? 'bg-gray-100' : '',
                   'flex items-center w-full px-3 py-2 text-sm text-gray-700'
@@ -80,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import {
@@ -93,7 +120,8 @@ import {
   UserCircleIcon,
   UserIcon,
   ArrowRightOnRectangleIcon,
-  ChevronUpDownIcon
+  ChevronUpDownIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 import { RouterLink } from 'vue-router'
 
@@ -111,10 +139,12 @@ interface NavigationItem {
 interface Props {
   user?: User | null
   navigationItems?: NavigationItem[]
+  isOpen?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   user: null,
+  isOpen: false,
   navigationItems: () => [
     {
       name: 'Dashboard',
@@ -146,11 +176,39 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   logout: []
+  close: []
 }>()
 
 const route = useRoute()
+const isMobile = ref(false)
 
 const isActiveRoute = (path: string) => {
   return route.path === path
 }
+
+const handleNavClick = () => {
+  if (isMobile.value) {
+    emit('close')
+  }
+}
+
+const handleLogout = () => {
+  emit('logout')
+  if (isMobile.value) {
+    emit('close')
+  }
+}
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 1024 // lg breakpoint
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 </script> 

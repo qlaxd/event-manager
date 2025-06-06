@@ -1,25 +1,55 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+      <div class="flex items-center justify-between px-4 py-3">
+        <button
+          @click="sidebarOpen = true"
+          class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+        >
+          <Bars3Icon class="w-6 h-6" />
+        </button>
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white rounded-lg">
+            <CalendarIcon class="w-5 h-5" />
+          </div>
+          <h1 class="ml-3 text-lg font-bold text-gray-900">EventManager</h1>
+        </div>
+        <button
+          @click="showCreateEventModal = true"
+          class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+        >
+          <PlusIcon class="w-6 h-6" />
+        </button>
+      </div>
+    </header>
+
     <!-- Main Layout Container -->
-    <div class="flex h-screen">
+    <div class="flex h-screen lg:h-screen">
       <!-- Left Sidebar -->
       <Sidebar 
         :user="currentUser" 
-        @logout="handleLogout" 
+        :is-open="sidebarOpen"
+        @logout="handleLogout"
+        @close="sidebarOpen = false"
       />
 
       <!-- Main Content -->
-      <main class="flex-1 flex">
+      <main class="flex-1 flex flex-col lg:flex-row w-full">
         <!-- Dashboard Content -->
-        <div class="flex-1 p-6 overflow-y-auto">
+        <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
           <!-- Header -->
           <div class="mb-6">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
                 <p class="text-gray-600">Welcome back! Here's what's happening with your events.</p>
               </div>
-              <Button variant="primary" @click="showCreateEventModal = true">
+              <Button 
+                variant="primary" 
+                @click="showCreateEventModal = true"
+                class="hidden lg:flex"
+              >
                 <PlusIcon class="w-4 h-4 mr-2" />
                 Create Event
               </Button>
@@ -27,50 +57,50 @@
           </div>
 
           <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div class="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
               <div class="flex items-center">
                 <div class="p-2 bg-blue-100 rounded-lg">
                   <CalendarDaysIcon class="w-6 h-6 text-blue-600" />
                 </div>
                 <div class="ml-4">
-                  <p class="text-2xl font-bold text-gray-900">24</p>
+                  <p class="text-xl sm:text-2xl font-bold text-gray-900">24</p>
                   <p class="text-sm text-gray-500">Total Events</p>
                 </div>
               </div>
             </div>
 
-            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
               <div class="flex items-center">
                 <div class="p-2 bg-yellow-100 rounded-lg">
                   <ClockIcon class="w-6 h-6 text-yellow-600" />
                 </div>
                 <div class="ml-4">
-                  <p class="text-2xl font-bold text-gray-900">8</p>
+                  <p class="text-xl sm:text-2xl font-bold text-gray-900">8</p>
                   <p class="text-sm text-gray-500">Upcoming</p>
                 </div>
               </div>
             </div>
 
-            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
               <div class="flex items-center">
                 <div class="p-2 bg-green-100 rounded-lg">
                   <CheckCircleIcon class="w-6 h-6 text-green-600" />
                 </div>
                 <div class="ml-4">
-                  <p class="text-2xl font-bold text-gray-900">16</p>
+                  <p class="text-xl sm:text-2xl font-bold text-gray-900">16</p>
                   <p class="text-sm text-gray-500">Completed</p>
                 </div>
               </div>
             </div>
 
-            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
               <div class="flex items-center">
                 <div class="p-2 bg-purple-100 rounded-lg">
                   <CalendarIcon class="w-6 h-6 text-purple-600" />
                 </div>
                 <div class="ml-4">
-                  <p class="text-2xl font-bold text-gray-900">5</p>
+                  <p class="text-xl sm:text-2xl font-bold text-gray-900">5</p>
                   <p class="text-sm text-gray-500">This Week</p>
                 </div>
               </div>
@@ -79,17 +109,17 @@
 
           <!-- Recent Events Section -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
               <div class="flex items-center justify-between">
                 <h2 class="text-lg font-medium text-gray-900">Upcoming Events</h2>
                 <button class="text-sm text-blue-600 hover:text-blue-800">View All</button>
               </div>
             </div>
 
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
               <!-- Search and Filter Bar -->
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex-1 max-w-lg">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div class="flex-1 max-w-full sm:max-w-lg">
                   <Input
                     v-model="searchQuery"
                     placeholder="Search events..."
@@ -100,12 +130,12 @@
                     </template>
                   </Input>
                 </div>
-                <div class="flex items-center space-x-3 ml-4">
+                <div class="flex items-center space-x-3">
                   <Dropdown>
                     <template #trigger>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" class="flex-shrink-0">
                         <FunnelIcon class="w-4 h-4 mr-2" />
-                        Filter
+                        <span class="hidden sm:inline">Filter</span>
                       </Button>
                     </template>
                     <DropdownItem>All Events</DropdownItem>
@@ -121,20 +151,20 @@
                 <div
                   v-for="event in filteredEvents"
                   :key="event.id"
-                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-4"
                 >
-                  <div class="flex items-center">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-lg mr-4"
+                  <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg mr-4 flex-shrink-0"
                          :class="getEventIconBg(event.type)">
                       <component :is="getEventIcon(event.type)" class="w-5 h-5" :class="getEventIconColor(event.type)" />
                     </div>
-                    <div>
-                      <h3 class="text-sm font-medium text-gray-900">{{ event.title }}</h3>
-                      <p class="text-sm text-gray-500">{{ event.description }}</p>
+                    <div class="min-w-0 flex-1">
+                      <h3 class="text-sm font-medium text-gray-900 truncate">{{ event.title }}</h3>
+                      <p class="text-sm text-gray-500 truncate">{{ event.description }}</p>
                       <p class="text-xs text-gray-400 mt-1">{{ formatDate(event.occurrence) }}</p>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-2">
+                  <div class="flex items-center justify-between sm:justify-end space-x-2 flex-shrink-0">
                     <span
                       class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                       :class="getStatusBadge(event.status)"
@@ -202,7 +232,7 @@
         </div>
 
         <!-- Right Sidebar -->
-        <aside class="w-80 bg-white shadow-lg p-6 overflow-y-auto">
+        <aside class="hidden xl:block w-80 bg-white shadow-lg p-6 overflow-y-auto">
           <!-- Quick Actions -->
           <div class="mb-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
@@ -246,13 +276,14 @@
                     size="sm"
                     class="mb-3"
                   />
-                  <div class="flex space-x-2">
-                    <Button variant="primary" size="xs">
+                  <div class="flex flex-col sm:flex-row gap-2">
+                    <Button variant="primary" size="xs" class="flex-1">
                       Send
                     </Button>
-                    <Button variant="outline" size="xs">
+                    <Button variant="outline" size="xs" class="flex-1">
                       <PhoneIcon class="w-3 h-3 mr-1" />
-                      Call Support
+                      <span class="hidden sm:inline">Call Support</span>
+                      <span class="sm:hidden">Call</span>
                     </Button>
                   </div>
                 </div>
@@ -299,11 +330,63 @@
         </div>
       </template>
     </Modal>
+
+    <!-- Mobile Quick Actions FAB -->
+    <div class="xl:hidden fixed bottom-6 right-6 z-40">
+      <div class="relative">
+        <button
+          @click="showQuickActions = !showQuickActions"
+          :class="[
+            'w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg',
+            'flex items-center justify-center transition-all duration-200',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+          ]"
+        >
+          <PlusIcon v-if="!showQuickActions" class="w-6 h-6" />
+          <XMarkIcon v-else class="w-6 h-6" />
+        </button>
+        
+        <!-- Quick Actions Menu -->
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <div
+            v-if="showQuickActions"
+            class="absolute bottom-16 right-0 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 py-2"
+          >
+            <button
+              @click="handleCreateEvent"
+              class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <PlusIcon class="w-4 h-4 mr-3 text-gray-400" />
+              Create Event
+            </button>
+            <button
+              class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <CalendarIcon class="w-4 h-4 mr-3 text-gray-400" />
+              View Calendar
+            </button>
+            <button
+              class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <ArrowDownTrayIcon class="w-4 h-4 mr-3 text-gray-400" />
+              Export Events
+            </button>
+          </div>
+        </transition>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import {
@@ -323,6 +406,8 @@ import {
   ChartBarIcon,
   CalendarDaysIcon,
   PlusIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 
 import Button from '@/components/ui/Button.vue'
@@ -339,6 +424,8 @@ const router = useRouter()
 // Reactive data
 const searchQuery = ref('')
 const helpQuery = ref('')
+const sidebarOpen = ref(false)
+const showQuickActions = ref(false)
 
 // Current user data (could come from a store like useAuthStore)
 const currentUser = ref({
@@ -454,6 +541,11 @@ const createEvent = () => {
   }
 }
 
+const handleCreateEvent = () => {
+  showCreateEventModal.value = true
+  showQuickActions.value = false
+}
+
 const editEvent = (event: any) => {
   console.log('Edit event:', event)
   // Implementation for edit functionality
@@ -487,6 +579,20 @@ const handleLogout = () => {
 
 onMounted(() => {
   // Initialize component
+  
+  // Close quick actions when clicking outside
+  const handleClickOutside = (event: Event) => {
+    const target = event.target as Element
+    if (!target.closest('.fixed.bottom-6.right-6')) {
+      showQuickActions.value = false
+    }
+  }
+  
+  document.addEventListener('click', handleClickOutside)
+  
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+  })
 })
 </script>
 
