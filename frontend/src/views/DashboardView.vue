@@ -320,7 +320,9 @@ import {
   PhoneIcon,
   UsersIcon,
   PresentationChartBarIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  CalendarDaysIcon,
+  PlusIcon,
 } from '@heroicons/vue/24/outline'
 
 import Button from '@/components/ui/Button.vue'
