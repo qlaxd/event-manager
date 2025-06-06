@@ -3,105 +3,10 @@
     <!-- Main Layout Container -->
     <div class="flex h-screen">
       <!-- Left Sidebar -->
-      <aside class="w-64 bg-white shadow-lg flex flex-col">
-        <!-- Logo/Brand -->
-        <div class="px-6 py-4 border-b border-gray-200">
-          <div class="flex items-center">
-            <div class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white rounded-lg">
-              <CalendarIcon class="w-5 h-5" />
-            </div>
-            <h1 class="ml-3 text-xl font-bold text-gray-900">EventManager</h1>
-          </div>
-        </div>
-
-        <!-- Navigation Menu -->
-        <nav class="flex-1 px-4 py-6 space-y-2">
-          <a
-            href="#"
-            class="flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white"
-          >
-            <HomeIcon class="w-5 h-5 mr-3" />
-            Dashboard
-          </a>
-          <a
-            href="#"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900"
-          >
-            <CalendarDaysIcon class="w-5 h-5 mr-3" />
-            My Events
-          </a>
-          <a
-            href="#"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900"
-          >
-            <PlusIcon class="w-5 h-5 mr-3" />
-            Create Event
-          </a>
-          <a
-            href="#"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900"
-          >
-            <ChartBarIcon class="w-5 h-5 mr-3" />
-            Analytics
-          </a>
-          <a
-            href="#"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900"
-          >
-            <Cog6ToothIcon class="w-5 h-5 mr-3" />
-            Settings
-          </a>
-        </nav>
-
-        <!-- User Menu -->
-        <div class="px-4 py-4 border-t border-gray-200">
-          <Menu as="div" class="relative">
-            <MenuButton class="flex items-center w-full px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100">
-              <UserCircleIcon class="w-8 h-8 mr-3" />
-              <div class="text-left">
-                <p class="text-sm font-medium text-gray-900">John Doe</p>
-                <p class="text-xs text-gray-500">john@example.com</p>
-              </div>
-              <ChevronUpDownIcon class="w-4 h-4 ml-auto" />
-            </MenuButton>
-            <transition
-              enter-active-class="transition duration-100 ease-out"
-              enter-from-class="transform scale-95 opacity-0"
-              enter-to-class="transform scale-100 opacity-100"
-              leave-active-class="transition duration-75 ease-in"
-              leave-from-class="transform scale-100 opacity-100"
-              leave-to-class="transform scale-95 opacity-0"
-            >
-              <MenuItems class="absolute bottom-full left-0 w-full mb-1 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'flex items-center px-3 py-2 text-sm text-gray-700'
-                    ]"
-                  >
-                    <UserIcon class="w-4 h-4 mr-2" />
-                    Profile
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
-                    :class="[
-                      active ? 'bg-gray-100' : '',
-                      'flex items-center px-3 py-2 text-sm text-gray-700'
-                    ]"
-                  >
-                    <ArrowRightOnRectangleIcon class="w-4 h-4 mr-2" />
-                    Sign out
-                  </a>
-                </MenuItem>
-              </MenuItems>
-            </transition>
-          </Menu>
-        </div>
-      </aside>
+      <Sidebar 
+        :user="currentUser" 
+        @logout="handleLogout" 
+      />
 
       <!-- Main Content -->
       <main class="flex-1 flex">
@@ -399,18 +304,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import {
   CalendarIcon,
-  CalendarDaysIcon,
-  HomeIcon,
-  PlusIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  UserCircleIcon,
-  UserIcon,
-  ArrowRightOnRectangleIcon,
-  ChevronUpDownIcon,
   ClockIcon,
   CheckCircleIcon,
   MagnifyingGlassIcon,
@@ -422,7 +319,8 @@ import {
   ChatBubbleLeftRightIcon,
   PhoneIcon,
   UsersIcon,
-  PresentationChartBarIcon
+  PresentationChartBarIcon,
+  ChartBarIcon
 } from '@heroicons/vue/24/outline'
 
 import Button from '@/components/ui/Button.vue'
@@ -431,10 +329,20 @@ import Modal from '@/components/ui/Modal.vue'
 import Dropdown from '@/components/ui/Dropdown.vue'
 import DropdownItem from '@/components/ui/DropdownItem.vue'
 import Calendar from '@/components/ui/Calendar.vue'
+import Sidebar from '@/components/ui/Sidebar.vue'
+import { RouterLink } from 'vue-router'
+
+const router = useRouter()
 
 // Reactive data
 const searchQuery = ref('')
 const helpQuery = ref('')
+
+// Current user data (could come from a store like useAuthStore)
+const currentUser = ref({
+  full_name: 'John Doe',
+  email: 'john@example.com'
+})
 const showCreateEventModal = ref(false)
 const newEvent = ref({
   title: '',
