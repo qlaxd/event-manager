@@ -7,6 +7,7 @@ export { default as DropdownItem } from './DropdownItem.vue'
 export { default as Tabs } from './Tabs.vue'
 export { default as Accordion } from './Accordion.vue'
 export { default as Alert } from './Alert.vue'
+export { default as Sidebar } from './Sidebar.vue'
 
 // Re-export Headless UI components for convenience
 export {
