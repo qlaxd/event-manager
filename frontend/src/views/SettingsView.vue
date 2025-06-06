@@ -469,8 +469,8 @@ const handleUpdateProfile = async () => {
       email: profileForm.email
     })
 
-    // Update user in store
-    authStore.user = response.user
+         // Update user in store
+     authStore.updateUser(response.user)
     
     showNotification('success', 'Success', 'Profile updated successfully')
   } catch (error: any) {
