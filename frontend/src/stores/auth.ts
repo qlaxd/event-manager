@@ -160,6 +160,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateUser = (updatedUser: User) => {
+    user.value = updatedUser
+  }
+
   return {
     // State
     user,
@@ -177,6 +181,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     fetchUser,
     refreshAccessToken,
-    initializeAuth
+    initializeAuth,
+    updateUser
   }
 }) 
