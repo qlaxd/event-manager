@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useSlots } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -90,7 +90,11 @@ const props = defineProps({
   type: {
     type: String,
     default: 'text',
-    validator: (value) => ['text', 'email', 'password', 'number', 'tel', 'url', 'search'].includes(value)
+    validator: (value) => [
+      'text', 'email', 'password', 'number', 'tel', 'url', 'search',
+      'date', 'datetime-local', 'time', 'month', 'week', 'color',
+      'file', 'hidden', 'range'
+    ].includes(value)
   },
   label: {
     type: String,
@@ -132,6 +136,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'keydown'])
+
+// Access slots
+const slots = useSlots()
 
 // Generate unique ID for input
 const inputId = `input-${Math.random().toString(36).substr(2, 9)}`
