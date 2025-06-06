@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "ucc-event-manager"
+version = "1.0.0"
+description = "Secure multi-user event management system with helpdesk integration"
+authors = ["UCC Event Manager Team"]
+readme = "README.md"
+python = "^3.11"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+sqlalchemy = "^2.0.0"
+alembic = "^1.12.0"
+asyncpg = "^0.29.0"
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+pyotp = "^2.9.0"
+cryptography = "^41.0.0"
+httpx = "^0.25.0"
+aiosmtplib = "^2.0.0"
+email-validator = "^2.1.0"
+slowapi = "^0.1.9"
+python-multipart = "^0.0.6"
+bleach = "^6.1.0"
+structlog = "^23.2.0"
+python-dotenv = "^1.0.0"
+qrcode = {extras = ["pil"], version = "^7.4.2"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+factory-boy = "^3.3.0"
+black = "^23.9.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+mypy = "^1.6.0"
+bandit = "^1.7.0"
+pre-commit = "^3.5.0"
+ipython = "^8.16.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto" 
