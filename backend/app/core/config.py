@@ -22,9 +22,9 @@ class Settings(BaseSettings):
     # Application Settings
     APP_NAME: str = "UCC Event Manager"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = False
+    DEBUG: bool = True
     ENVIRONMENT: str = "development"
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str = "DEBUG"
     
     # API Settings
     API_V1_PREFIX: str = "/api/v1"
