@@ -29,13 +29,15 @@ class RefreshToken(Base):
         index=True,
     )
     
-    # Token fields
+    # Token fields (JWT ID)
     jti = Column(
         String(64),
         unique=True,
         nullable=False,
         index=True,
     )
+
+    # Token hash (JWT token)
     token_hash = Column(
         Text,
         nullable=False,
@@ -55,11 +57,15 @@ class RefreshToken(Base):
         nullable=False,
         default=datetime.utcnow,
     )
+
+    # Token expiration
     expires_at = Column(
         DateTime(timezone=True),
         nullable=False,
         index=True,
     )
+
+    # Token revocation
     revoked_at = Column(
         DateTime(timezone=True),
         nullable=True,
