@@ -1,5 +1,25 @@
-"""Pydantic schemas for token-related operations."""
+"""
+Pydantic schemas for token-related data for the UCC Event Manager.
+"""
 from pydantic import BaseModel, Field
+
+
+class Token(BaseModel):
+    """
+    Response model for the login endpoint.
+    Provides the tokens needed for an authenticated session.
+    """
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
+class TokenPayload(BaseModel):
+    """
+    Represents the data encoded within a JWT access token.
+    """
+    sub: str | None = None  # 'sub' (subject) claim, e.g., user ID
+    exp: int | None = None  # 'exp' (expiration time) claim 
 
 
 class TokenResponse(BaseModel):
