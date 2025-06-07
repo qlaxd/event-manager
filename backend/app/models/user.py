@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, DateTime, String, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 
 from app.core.database import Base
 
@@ -105,35 +105,35 @@ class User(Base):
     )
     
     # Relationships
-    events: List["Event"] = relationship(
+    events: Mapped[List["Event"]] = relationship(
         "Event",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
     
-    refresh_tokens: List["RefreshToken"] = relationship(
+    refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
         "RefreshToken",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
     
-    password_reset_tokens: List["PasswordResetToken"] = relationship(
+    password_reset_tokens: Mapped[List["PasswordResetToken"]] = relationship(
         "PasswordResetToken",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
     
-    mfa_backup_codes: List["MFABackupCode"] = relationship(
+    mfa_backup_codes: Mapped[List["MFABackupCode"]] = relationship(
         "MFABackupCode",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
     
-    audit_logs: List["AuditLog"] = relationship(
+    audit_logs: Mapped[List["AuditLog"]] = relationship(
         "AuditLog",
         back_populates="user",
         cascade="all, delete-orphan",

@@ -107,6 +107,12 @@ backend/
 
 3. Activate the virtual environment:
    ```bash
+   poetry env activate
+   ```
+   
+   #### or
+
+   ```bash
    poetry shell
    ```
 

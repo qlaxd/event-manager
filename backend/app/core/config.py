@@ -6,7 +6,7 @@ import secrets
 from typing import Any, List, Optional, Union
 from pathlib import Path
 
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, validator
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,19 +51,19 @@ class Settings(BaseSettings):
     JWT_PUBLIC_KEY: Optional[str] = None
     
     @field_validator("JWT_PRIVATE_KEY", mode="before")
-    def load_private_key(cls, v: Optional[str], values: dict) -> Optional[str]:
+    def load_private_key(cls, v: Optional[str], info: ValidationInfo) -> Optional[str]:
         if v:
             return v
-        key_path = values.get("JWT_PRIVATE_KEY_PATH")
+        key_path = info.data.get("JWT_PRIVATE_KEY_PATH") if info.data else None
         if key_path and Path(key_path).exists():
             return Path(key_path).read_text()
         return None
     
     @field_validator("JWT_PUBLIC_KEY", mode="before")
-    def load_public_key(cls, v: Optional[str], values: dict) -> Optional[str]:
+    def load_public_key(cls, v: Optional[str], info: ValidationInfo) -> Optional[str]:
         if v:
             return v
-        key_path = values.get("JWT_PUBLIC_KEY_PATH")
+        key_path = info.data.get("JWT_PUBLIC_KEY_PATH") if info.data else None
         if key_path and Path(key_path).exists():
             return Path(key_path).read_text()
         return None
@@ -138,9 +138,7 @@ class Settings(BaseSettings):
         "Referrer-Policy": "strict-origin-when-cross-origin",
     }
     
-    class Config:
-        case_sensitive = False
-        env_file = ".env"
+
         
     def get_rate_limit_string(self, limit_type: str) -> str:
         """Get rate limit string for slowapi."""

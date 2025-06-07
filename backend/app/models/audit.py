@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 
 from app.core.database import Base
 
@@ -88,7 +88,7 @@ class AuditLog(Base):
     )
     
     # Relationships
-    user: "User" = relationship(
+    user: Mapped["User"] = relationship(
         "User",
         back_populates="audit_logs",
         lazy="selectin",

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 
 from app.core.database import Base
 
@@ -82,7 +82,7 @@ class RefreshToken(Base):
     )
     
     # Relationships
-    user: "User" = relationship(
+    user: Mapped["User"] = relationship(
         "User",
         back_populates="refresh_tokens",
         lazy="selectin",
@@ -155,7 +155,7 @@ class PasswordResetToken(Base):
     )
     
     # Relationships
-    user: "User" = relationship(
+    user: Mapped["User"] = relationship(
         "User",
         back_populates="password_reset_tokens",
         lazy="selectin",
@@ -221,7 +221,7 @@ class MFABackupCode(Base):
     )
     
     # Relationships
-    user: "User" = relationship(
+    user: Mapped["User"] = relationship(
         "User",
         back_populates="mfa_backup_codes",
         lazy="selectin",
