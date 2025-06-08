@@ -10,7 +10,7 @@ from fastapi import HTTPException, status
 from app.models.event import Event
 from app.models.user import User
 from app.repositories.event_repository import EventRepository
-from schemas.event import EventCreate
+from schemas.event import EventCreate, EventUpdate
 
 
 class EventService:
@@ -96,3 +96,29 @@ class EventService:
             )
         
         return db_event
+
+    async def update_event(
+        self, *, event_id: UUID, event_data: EventUpdate, current_user: User
+    ) -> Event:
+        """
+        Updates an event's description after verifying ownership.
+
+        :param event_id: The ID of the event to update.
+        :param event_data: The data for the event update (description only).
+        :param current_user: The user performing the update.
+        :return: The updated event.
+        """
+        # First, get the event and verify ownership
+        db_event = await self.get_event_by_id(
+            event_id=event_id, current_user=current_user
+        )
+
+        # Get the update data, excluding unset fields to avoid overwriting with None
+        update_data = event_data.model_dump(exclude_unset=True)
+
+        # Call the repository to perform the update
+        updated_event = await self.repository.update(
+            db_event=db_event, event_data=update_data
+        )
+        
+        return updated_event

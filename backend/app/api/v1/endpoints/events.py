@@ -110,6 +110,30 @@ async def get_event(
     return event
 
 
+@router.patch(
+    "/{event_id}",
+    response_model=event_schema.EventRead,
+    summary="Update Event",
+    description="Update an event's description. Only the description field can be changed.",
+)
+async def update_event(
+    event_id: UUID,
+    event_in: event_schema.EventUpdate,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Updates the description of a specific event.
+
+    The endpoint first verifies that the event exists and belongs to the
+    authenticated user before applying the update.
+    """
+    service = EventService(db)
+    updated_event = await service.update_event(
+        event_id=event_id, event_data=event_in, current_user=current_user
+    )
+    return updated_event
+
+
 # TODO: Implement other event endpoints
-# - PATCH /events/{event_id}
 # - DELETE /events/{event_id} 

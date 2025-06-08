@@ -1,5 +1,5 @@
 """
-Repository for database operations on the Event model.
+Repository for database CRUD operations on the Event model.
 """
 from datetime import datetime
 from uuid import UUID
@@ -110,3 +110,19 @@ class EventRepository:
         )
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
+
+    async def update(self, *, db_event: Event, event_data: dict) -> Event:
+        """
+        Updates an existing event in the database.
+
+        :param db_event: The event object to update.
+        :param event_data: A dictionary containing the data to update.
+        :return: The updated Event object.
+        """
+        for field, value in event_data.items():
+            setattr(db_event, field, value)
+        
+        self.db.add(db_event)
+        await self.db.commit()
+        await self.db.refresh(db_event)
+        return db_event
