@@ -86,3 +86,9 @@ async def refresh_access_token(
     return TokenResponse(**refreshed_token_data)
 
 
+# @router.post("/revoke")
+# @limiter.limit("10/minute")
+# async def revoke_refresh_token(token_data: TokenRevokeRequest):
+#     return TokenResponse()
+
+
