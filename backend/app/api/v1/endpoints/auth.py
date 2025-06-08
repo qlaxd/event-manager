@@ -208,3 +208,36 @@ async def enable_mfa(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during MFA setup.",
         )
+
+
+@router.post(
+    "/mfa/verify",
+    status_code=status.HTTP_200_OK,
+    summary="Verify and complete MFA setup",
+    description="Verifies a TOTP code to finalize the MFA enablement process. "
+                "Once verified, MFA will be active on the user's account.",
+    dependencies=[Depends(get_current_user)]
+)
+async def verify_mfa_setup(
+    request: Request,
+    payload: MFAVerifyRequest,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Endpoint to verify the TOTP code and finalize MFA setup.
+    """
+    client_ip = get_remote_address(request)
+    try:
+        result = await MFAService.verify_mfa_setup(
+            db=db, user=current_user, mfa_code=payload.mfa_code, ip_address=client_ip
+        )
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error("MFA verification failed with an unexpected error", error=e, user_id=current_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during MFA verification.",
+        )
