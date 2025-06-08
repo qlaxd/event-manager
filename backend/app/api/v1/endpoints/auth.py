@@ -167,3 +167,44 @@ async def confirm_password_reset(
         new_password=reset_data.new_password,
     )
     return JSONResponse(content=response)
+
+
+# MFA Management Endpoints
+
+@router.post(
+    "/mfa/enable",
+    response_model=MFAEnableResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Initiate MFA enablement",
+    description="Initiates the MFA enablement process for the authenticated user. "
+                "Verifies the user's password and returns an MFA secret, QR code, "
+                "and backup codes. The user must then verify with a TOTP code to finalize.",
+    dependencies=[Depends(get_current_user)]
+)
+async def enable_mfa(
+    request: Request,
+    payload: MFAEnableRequest,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Endpoint to initiate the process of enabling Multi-Factor Authentication (MFA).
+
+    Requires the user's current password for verification.
+    """
+    client_ip = get_remote_address(request)
+    try:
+        result = await MFAService.enable_mfa(
+            db=db, user=current_user, password=payload.password, ip_address=client_ip
+        )
+        return result
+    except HTTPException as e:
+        # Re-raise HTTPExceptions from the service layer to return proper error responses
+        raise e
+    except Exception as e:
+        # Log unexpected errors for debugging
+        logger.error("MFA enablement failed with an unexpected error", error=e, user_id=current_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during MFA setup.",
+        )
