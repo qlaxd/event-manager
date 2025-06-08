@@ -1,41 +1,59 @@
 """Pydantic schemas for Event model."""
+import uuid
 from datetime import datetime
-from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-# Base schema for event attributes
 class EventBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=100, example="Team Meeting")
-    description: Optional[str] = Field(None, max_length=500, example="Discuss project status.")
-    occurrence: datetime = Field(..., example="2024-12-31T23:59:59Z")
+    """Base schema with common event fields."""
+    title: str = Field(..., min_length=1, max_length=255)
+    occurrence: datetime
+    description: str | None = Field(default=None, max_length=10000)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "title": "Team Meeting",
+                "occurrence": "2024-10-20T10:00:00Z",
+                "description": "Weekly sync-up meeting.",
+            }
+        }
 
 
-# Schema for creating an event
 class EventCreate(EventBase):
+    """Schema for creating an event."""
     pass
 
 
-# Schema for updating an event
 class EventUpdate(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=100, example="Updated Team Meeting")
-    description: Optional[str] = Field(None, max_length=500, example="Updated project status discussion.")
-    occurrence: Optional[datetime] = Field(None, example="2025-01-01T10:00:00Z")
+    """
+    Schema for updating an event. Only the description is updatable as per requirements.
+    """
+    description: str | None = Field(default=None, max_length=10000)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "description": "Updated: Weekly sync-up meeting and project planning.",
+            }
+        }
 
 
-# Schema for event data returned by the API
-class Event(EventBase):
-    id: UUID
-    user_id: UUID
+class EventRead(EventBase):
+    """Response model for reading an event."""
+    id: uuid.UUID
+    user_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-# Schema for event data as stored in the database
-class EventInDB(Event):
-    pass 
+class PaginatedEventRead(BaseModel):
+    """Response model for paginated event lists."""
+    total: int
+    limit: int
+    offset: int
+    data: list[EventRead] 
