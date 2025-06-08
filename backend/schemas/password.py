@@ -24,6 +24,7 @@ class PasswordResetConfirm(BaseModel):
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one number')
         # Check against common passwords (simplified)
+        # TODO: Add a list of common passwords, i guess i can use some library for this
         common_passwords = {'password', '12345678', 'qwerty', 'password123'}
         if v.lower() in common_passwords:
             raise ValueError('Password is too common')

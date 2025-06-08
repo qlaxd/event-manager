@@ -61,6 +61,7 @@ class SecurityUtils:
             return False, "Password must contain at least one number"
         
         # Check for common passwords (implement with a proper list in production)
+        # TODO: Add a list of common passwords, i guess i can use some library for this
         common_passwords = ["password", "12345678", "qwerty", "abc123"]
         if password.lower() in common_passwords:
             return False, "Password is too common"
