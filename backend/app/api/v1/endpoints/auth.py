@@ -241,3 +241,39 @@ async def verify_mfa_setup(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during MFA verification.",
         )
+
+
+@router.post(
+    "/mfa/disable",
+    status_code=status.HTTP_200_OK,
+    summary="Disable MFA for the user",
+    description="Disables MFA for the authenticated user after verifying their password and a valid MFA code.",
+    dependencies=[Depends(get_current_user)]
+)
+async def disable_mfa(
+    request: Request,
+    payload: MFADisableRequest,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Endpoint to disable Multi-Factor Authentication for the user.
+    """
+    client_ip = get_remote_address(request)
+    try:
+        result = await MFAService.disable_mfa(
+            db=db,
+            user=current_user,
+            password=payload.password,
+            mfa_code=payload.mfa_code,
+            ip_address=client_ip,
+        )
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error("MFA disable failed with an unexpected error", error=e, user_id=current_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while disabling MFA.",
+        )
