@@ -13,6 +13,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 
 from app.core.config import settings
 from app.core.database import get_async_session
@@ -99,7 +100,6 @@ class SecurityUtils:
             "exp": expire,
             "iat": datetime.now(timezone.utc),
             "type": "refresh",
-            "jti": secrets.token_urlsafe(32)  # Unique token ID for revocation
         })
         
         # Use RS256 with private key if available, otherwise HS256
@@ -113,14 +113,23 @@ class SecurityUtils:
     @staticmethod
     def decode_token(token: str) -> Dict[str, Any]:
         """Decode and validate JWT token."""
+        logger = structlog.get_logger(__name__)
+
         try:
             # Use RS256 with public key if available, otherwise HS256
             if settings.JWT_PUBLIC_KEY and settings.ALGORITHM == "RS256":
+                logger.info("Attempting to decode token with RS256.")
                 payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[settings.ALGORITHM])
             else:
+                logger.warning(
+                    "Falling back to HS256 decoding.",
+                    algorithm_setting=settings.ALGORITHM,
+                    public_key_set=bool(settings.JWT_PUBLIC_KEY)
+                )
                 payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             return payload
-        except JWTError:
+        except JWTError as e:
+            logger.error("JWT decoding failed", error=str(e))
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
@@ -191,11 +200,11 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    # Import here to avoid circular imports
-    from app.repositories.user_repository import UserRepository
+
+    from backend.app.repositories.user_repository import UserRepository
     
     user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(user_id)
+    user = await user_repo.get_user_by_id(user_id)
     
     if user is None:
         raise credentials_exception

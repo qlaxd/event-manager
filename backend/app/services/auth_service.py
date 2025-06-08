@@ -5,7 +5,7 @@ from fastapi import HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.models.user import User
-from repositories.user_repository import UserRepository
+from app.repositories.user_repository import UserRepository
 from app.core.security import SecurityUtils
 from schemas.token import TokenResponse
 from schemas.mfa import MFAEnableRequest, MFAEnableResponse, MFADisableRequest, MFAVerifyRequest
@@ -15,10 +15,11 @@ from app.services.audit_service import log_security_event
 from app.services.mfa_service import MFAService
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.core.config import settings
 import structlog
 from app.models.auth import RefreshToken
+from app.repositories.refresh_token_repository import RefreshTokenRepository
 
 
 class AuthService:
@@ -68,7 +69,8 @@ class AuthService:
         Handles the user login process, including password and MFA verification.
         Returns a new set of tokens upon success.
         """
-        user = await UserRepository._get_user_by_email(db, email)
+        user_repo = UserRepository(db)
+        user = await user_repo.get_by_email(email)
 
         # Log the authentication attempt
         await log_security_event(
@@ -129,7 +131,7 @@ class AuthService:
         )
 
         token_hash = AuthService._hash_token(refresh_token)
-        expires_at = datetime.utcnow() + timedelta(
+        expires_at = datetime.now(timezone.utc) + timedelta(
             days=settings.REFRESH_TOKEN_EXPIRE_DAYS
         )
 
@@ -145,7 +147,7 @@ class AuthService:
             details={"mfa_used": user.mfa_enabled},
         )
 
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(timezone.utc)
         user.last_login_ip = ip_address
         await db.commit()
 
@@ -153,5 +155,152 @@ class AuthService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        }
+
+    @staticmethod
+    async def refresh_token(
+        db: AsyncSession,
+        request: Request,
+        ip_address: str,
+        refresh_token: str,
+    ):
+        """
+        Handles refresh token validation and issues a new token pair.
+        Implements refresh token rotation for enhanced security.
+        """
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+        try:
+            payload = SecurityUtils.decode_token(refresh_token)
+            if payload.get("type") != "refresh":
+                AuthService.logger.warning(
+                    "Invalid token type for refresh", token_payload=payload
+                )
+                raise credentials_exception
+
+            user_id = payload.get("sub")
+            jti = payload.get("jti")
+            if not user_id or not jti:
+                AuthService.logger.warning(
+                    "Missing user_id or jti in refresh token", token_payload=payload
+                )
+                raise credentials_exception
+        except Exception as e:
+            AuthService.logger.warning("Refresh token decoding failed", error=str(e))
+            raise credentials_exception
+
+        user_repo = UserRepository(db)
+        user = await user_repo.get_by_id(user_id)
+        if not user or not user.is_active:
+            AuthService.logger.warning(
+                "Refresh token failure: user not found or inactive.",
+                user_id=user_id,
+                is_active=getattr(user, "is_active", None),
+            )
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REFRESH_FAILURE",
+                user_id=user.id if user else None,
+                ip_address=ip_address,
+                details={"reason": "user_not_found_or_inactive", "user_id": user_id},
+            )
+            raise credentials_exception
+
+        token_repo = RefreshTokenRepository(db)
+        db_refresh_token = await token_repo.get_by_jti(jti)
+
+        if not db_refresh_token:
+            AuthService.logger.warning(
+                "Refresh token failure: JTI not found in DB.", jti=jti
+            )
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REFRESH_FAILURE",
+                user_id=user.id,
+                ip_address=ip_address,
+                details={"reason": "refresh_token_not_found", "jti": jti},
+            )
+            raise credentials_exception
+
+        if db_refresh_token.revoked_at is not None:
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REFRESH_FAILURE_REUSE",
+                user_id=user.id,
+                ip_address=ip_address,
+                details={
+                    "reason": "attempted_reuse_of_revoked_refresh_token",
+                    "jti": jti,
+                },
+            )
+            raise credentials_exception
+
+        token_hash = AuthService._hash_token(refresh_token)
+        if not secrets.compare_digest(db_refresh_token.token_hash, token_hash):
+            AuthService.logger.warning(
+                "Refresh token failure: token hash mismatch.", jti=jti
+            )
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REFRESH_FAILURE",
+                user_id=user.id,
+                ip_address=ip_address,
+                details={"reason": "token_hash_mismatch", "jti": jti},
+            )
+            raise credentials_exception
+
+        if db_refresh_token.expires_at < datetime.now(timezone.utc):
+            AuthService.logger.warning(
+                "Refresh token failure: expired refresh token.", jti=jti
+            )
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REFRESH_FAILURE",
+                user_id=user.id,
+                ip_address=ip_address,
+                details={"reason": "expired_refresh_token", "jti": jti},
+            )
+            raise credentials_exception
+
+        db_refresh_token.revoked_at = datetime.now(timezone.utc)
+        await db.commit()
+
+        new_jti = secrets.token_urlsafe(32)
+        access_token_expires = timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+        new_access_token = SecurityUtils.create_access_token(
+            data={"sub": str(user.id), "email": user.email},
+            expires_delta=access_token_expires,
+        )
+        new_refresh_token = SecurityUtils.create_refresh_token(
+            data={"sub": str(user.id), "jti": new_jti}
+        )
+
+        new_token_hash = AuthService._hash_token(new_refresh_token)
+        new_expires_at = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+        await AuthService._create_refresh_token_record(
+            db, user, new_jti, new_token_hash, new_expires_at, request, ip_address
+        )
+
+        await log_security_event(
+            db=db,
+            event_type="AUTH_REFRESH_SUCCESS",
+            user_id=user.id,
+            ip_address=ip_address,
+            details={"new_jti": new_jti, "revoked_jti": jti},
+        )
+
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "expires_in": int(access_token_expires.total_seconds()),
         }
         
