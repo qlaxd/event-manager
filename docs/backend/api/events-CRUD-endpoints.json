@@ -1,0 +1,101 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "events",
+    "collectionId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+    "dateExported": "2025-06-08T21:22:05.017Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "fc57fd2c-8dea-4cc3-a3c0-128437a8842b",
+            "colId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+            "containerId": "",
+            "name": "/events",
+            "url": "http://localhost:8000/api/v1/events",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2025-06-08T20:37:27.137Z",
+            "modified": "2025-06-08T20:38:09.454Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQxNTEzNSwiaWF0IjoxNzQ5NDExNTM1LCJ0eXBlIjoiYWNjZXNzIn0.g8VWdJYq9znpCCqQu8HWh1gm_so7qNyMk170pINBm8-ix6ryF-Hyzzkyoz8tW3QT-9_LblMeSQUjDee6YsarbtBHZ7GwH5LULuLiNDCMKU97sjtZuVIIs5uSssqCjVb94hwj9dqMizKzTMzFG8n3Zvtx6EW4kN7fC8cC2ubp73Z8rirb9N3zB72qs5yKpAgRRdRsJyrgmFHKu-LpxYyw0i4z6IYD9a8ugqqtguf6xLAsHGXlwVelejuNfyOBjBrhteyIHlpPDSiXVzfpnUntJAFcjns8E_BBQEoZPnttvxUMtyklqcusnh4oxTqfkRYtldXPOS_FZ3PTlyCwfdQdO0Xz3XTDcLc8nTsKCQTdZWvzs55gw0yG0FV-sNAXDuI9TIKXrp5fRtpWaLOtmUQXbSTlQFAQItcMvcJn-Sv1KWwNJjS8gNNXswV9I8pK351RGB6-8_HxzM9OnwVwuoRu6M387nwDSIMr2BTxBCB3Yss4lFerxC299enuC30tvBok2qR9TCtkYIx4h1TFvtLgl2YNhb3t0qmmdZ1LBzVfDMZTUXz_O3QyUK9h7lQ1hbJMnJu0qw2GaLIrNPJCUKKqxJ20gPf0rzod6zOAuPngvMrnAi71EHjrrE2Jqw9LsReDlHneCXKW8vaqT81Gu6Zi74c4SU8IzJELqdmecUjtX9M"
+            }
+        },
+        {
+            "_id": "1d625ccc-a157-4b20-b141-d734b70b443c",
+            "colId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+            "containerId": "",
+            "name": "/events",
+            "url": "http://localhost:8000/api/v1/events/",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2025-06-08T20:38:41.465Z",
+            "modified": "2025-06-08T21:00:15.887Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"title\": \"Team Meeting\",\n  \"occurrence\": \"2024-02-15T14:30:00Z\",\n  \"description\": \"Weekly team sync meeting\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk"
+            }
+        },
+        {
+            "_id": "73621b03-f013-453c-ae91-134e04808d90",
+            "colId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+            "containerId": "",
+            "name": "/events/{event_id}",
+            "url": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2025-06-08T20:48:41.962Z",
+            "modified": "2025-06-08T20:53:43.099Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk"
+            }
+        },
+        {
+            "_id": "80e1517c-2101-4c66-a74c-c0665fc19523",
+            "colId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+            "containerId": "",
+            "name": "/events/{event_id}",
+            "url": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+            "method": "PATCH",
+            "sortNum": 40000,
+            "created": "2025-06-08T21:00:35.803Z",
+            "modified": "2025-06-08T21:04:49.378Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"title\": \"ez csak egy teszt event\",\n  \"description\": \"ez egy teszt disc \"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk"
+            }
+        },
+        {
+            "_id": "37564eb2-2bed-4876-ae4f-8ecc4e64f805",
+            "colId": "f96a0597-4428-4f2e-aa86-737dd3f6064a",
+            "containerId": "",
+            "name": "/events/{event_id}",
+            "url": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+            "method": "DELETE",
+            "sortNum": 50000,
+            "created": "2025-06-08T21:20:36.341Z",
+            "modified": "2025-06-08T21:21:10.944Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk"
+            }
+        }
+    ],
+    "ref": "niuDnCcX7aSra0_Xcr0rCQM_3pogxvb0Y-WIiRfjoaasmrkiz0qPrKOGtFMAiFVtnLO6L0OAxA4R4Z7AV-gZ4g"
+}

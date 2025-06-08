@@ -126,3 +126,13 @@ class EventRepository:
         await self.db.commit()
         await self.db.refresh(db_event)
         return db_event
+
+    async def delete(self, *, db_event: Event) -> None:
+        """
+        Soft deletes an event by setting the deleted_at timestamp.
+
+        :param db_event: The event object to soft delete.
+        """
+        db_event.deleted_at = datetime.utcnow()
+        self.db.add(db_event)
+        await self.db.commit()

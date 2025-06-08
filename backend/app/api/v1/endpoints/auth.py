@@ -42,7 +42,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 # Authentication Endpoints
 
 @router.post("/token", response_model=TokenResponse)
-@limiter.limit("5/15minutes")
+@limiter.limit("10/minute")
 async def login_for_access_token(
     request: Request,
     form_data: OAuth2PasswordRequestFormWithMFA = Depends(),
@@ -87,7 +87,7 @@ async def refresh_access_token(
 
 
 @router.post("/revoke", status_code=status.HTTP_200_OK)
-@limiter.limit("20/minute")
+@limiter.limit("10/minute")
 async def revoke_refresh_token(
     request: Request,
     token_data: TokenRevokeRequest,
@@ -120,7 +120,7 @@ async def revoke_refresh_token(
 # Password Management Endpoints
 
 @router.post("/password-reset/request", status_code=status.HTTP_200_OK)
-@limiter.limit("3/hour")
+@limiter.limit("10/minute")
 async def request_password_reset(
     request: Request,
     reset_request: PasswordResetRequest,
@@ -145,7 +145,7 @@ async def request_password_reset(
 
 
 @router.post("/password-reset/confirm", status_code=status.HTTP_200_OK)
-@limiter.limit("25/15minutes")
+@limiter.limit("10/minute")
 async def confirm_password_reset(
     request: Request,
     reset_data: PasswordResetConfirm,
@@ -181,6 +181,7 @@ async def confirm_password_reset(
                 "and backup codes. The user must then verify with a TOTP code to finalize.",
     dependencies=[Depends(get_current_user)]
 )
+@limiter.limit("10/minute")
 async def enable_mfa(
     request: Request,
     payload: MFAEnableRequest,
@@ -218,6 +219,7 @@ async def enable_mfa(
                 "Once verified, MFA will be active on the user's account.",
     dependencies=[Depends(get_current_user)]
 )
+@limiter.limit("10/minute")
 async def verify_mfa_setup(
     request: Request,
     payload: MFAVerifyRequest,
@@ -250,6 +252,7 @@ async def verify_mfa_setup(
     description="Disables MFA for the authenticated user after verifying their password and a valid MFA code.",
     dependencies=[Depends(get_current_user)]
 )
+@limiter.limit("10/minute")
 async def disable_mfa(
     request: Request,
     payload: MFADisableRequest,

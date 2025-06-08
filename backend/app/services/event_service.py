@@ -122,3 +122,18 @@ class EventService:
         )
         
         return updated_event
+
+    async def delete_event(self, *, event_id: UUID, current_user: User) -> None:
+        """
+        Deletes an event after verifying ownership.
+
+        :param event_id: The ID of the event to delete.
+        :param current_user: The user performing the deletion.
+        """
+        # First, get the event and verify ownership
+        db_event = await self.get_event_by_id(
+            event_id=event_id, current_user=current_user
+        )
+
+        # Call the repository to perform the soft delete
+        await self.repository.delete(db_event=db_event)

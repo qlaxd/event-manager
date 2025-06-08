@@ -5,15 +5,18 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Request, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
 from schemas import event as event_schema
 from app.services.event_service import EventService
 from app.core import get_current_active_user, get_async_session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post(
@@ -23,7 +26,9 @@ router = APIRouter()
     summary="Create New Event",
     description="Create a new event for the authenticated user.",
 )
+@limiter.limit("10/minute")
 async def create_event(
+    request: Request,
     event_in: event_schema.EventCreate,
     db: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_active_user),
@@ -51,7 +56,9 @@ async def create_event(
     summary="List User Events",
     description="Get a paginated list of events for the authenticated user, with options for sorting and filtering.",
 )
+@limiter.limit("10/minute")
 async def list_events(
+    request: Request,
     db: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_active_user),
     offset: int = Query(0, ge=0, description="Number of events to skip."),
@@ -93,7 +100,9 @@ async def list_events(
     summary="Get Single Event",
     description="Get details of a specific event by its ID.",
 )
+@limiter.limit("10/minute")
 async def get_event(
+    request: Request,
     event_id: UUID,
     db: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_active_user),
@@ -110,13 +119,21 @@ async def get_event(
     return event
 
 
+# PATCH /events/{event_id}
+# - Update Event
+# - Only the description field can be changed.
+# - The endpoint first verifies that the event exists and belongs to the
+# - authenticated user before applying the update.
+
 @router.patch(
     "/{event_id}",
     response_model=event_schema.EventRead,
     summary="Update Event",
     description="Update an event's description. Only the description field can be changed.",
 )
+@limiter.limit("10/minute")
 async def update_event(
+    request: Request,
     event_id: UUID,
     event_in: event_schema.EventUpdate,
     db: AsyncSession = Depends(get_async_session),
@@ -135,5 +152,32 @@ async def update_event(
     return updated_event
 
 
-# TODO: Implement other event endpoints
-# - DELETE /events/{event_id} 
+# DELETE /events/{event_id}
+# - Delete Event
+# - The endpoint first verifies that the event exists and belongs to the
+# - authenticated user before deleting it.
+
+@router.delete(
+    "/{event_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete Event",
+    description="Delete an event by its ID.",
+)
+@limiter.limit("10/minute")
+async def delete_event(
+    request: Request,
+    event_id: UUID,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Deletes a specific event.
+
+    The endpoint ensures the user owns the event before deletion.
+    Returns 204 No Content on successful deletion.
+    """
+    service = EventService(db)
+    await service.delete_event(event_id=event_id, current_user=current_user)
+    return None
+
+
