@@ -201,10 +201,10 @@ async def get_current_user(
         raise credentials_exception
     
 
-    from backend.app.repositories.user_repository import UserRepository
+    from app.repositories.user_repository import UserRepository
     
     user_repo = UserRepository(db)
-    user = await user_repo.get_user_by_id(user_id)
+    user = await user_repo.get_by_id(user_id)
     
     if user is None:
         raise credentials_exception

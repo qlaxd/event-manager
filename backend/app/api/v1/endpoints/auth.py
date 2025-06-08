@@ -6,7 +6,7 @@ password reset functionality, and comprehensive security measures.
 """
 
 import structlog
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from slowapi import Limiter
@@ -86,9 +86,34 @@ async def refresh_access_token(
     return TokenResponse(**refreshed_token_data)
 
 
-# @router.post("/revoke")
-# @limiter.limit("10/minute")
-# async def revoke_refresh_token(token_data: TokenRevokeRequest):
-#     return TokenResponse()
+@router.post("/revoke", status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
+async def revoke_refresh_token(
+    request: Request,
+    token_data: TokenRevokeRequest,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Revoke a refresh token (logout).
+
+    This endpoint invalidates a specified refresh token, effectively logging out
+    the session associated with it. This action requires the user to be authenticated
+    with a valid access token. The token to be revoked must be a refresh token.
+    """
+    if token_data.token_type_hint and token_data.token_type_hint != "refresh_token":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported token type. Only 'refresh_token' can be revoked.",
+        )
+
+    await AuthService.revoke_refresh_token(
+        db=db,
+        request=request,
+        ip_address=get_remote_address(request),
+        token_to_revoke=token_data.token,
+        current_user=current_user,
+    )
+    return JSONResponse(content={"message": "Token revoked successfully"})
 
 

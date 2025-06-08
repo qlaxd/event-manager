@@ -303,4 +303,88 @@ class AuthService:
             "refresh_token": new_refresh_token,
             "expires_in": int(access_token_expires.total_seconds()),
         }
+
+    @staticmethod
+    async def revoke_refresh_token(
+        db: AsyncSession,
+        request: Request,
+        ip_address: str,
+        token_to_revoke: str,
+        current_user: User,
+    ):
+        """
+        Revokes a specific refresh token, making it invalid for future use.
+        Ensures that the user revoking the token is its legitimate owner.
+        """
+        try:
+            payload = SecurityUtils.decode_token(token_to_revoke)
+            token_type = payload.get("type")
+            token_owner_id = payload.get("sub")
+            jti = payload.get("jti")
+
+            if token_type != "refresh" or not token_owner_id or not jti:
+                AuthService.logger.warning("Invalid refresh token payload for revocation", payload=payload)
+                # Don't raise error, to prevent leaking token validity info.
+                return
+        except Exception as e:
+            AuthService.logger.warning("Refresh token decoding failed during revocation", error=str(e))
+            # As the token is unusable, we can consider the goal achieved.
+            return
+
+        # Critical Security Check: The user authenticated via Bearer token must be the owner of the refresh token.
+        if str(current_user.id) != token_owner_id:
+            await log_security_event(
+                db=db,
+                event_type="AUTH_REVOKE_FAILURE",
+                user_id=current_user.id,
+                ip_address=ip_address,
+                details={
+                    "reason": "permission_denied",
+                    "attempted_revocation_of_jti": jti,
+                    "token_owner": token_owner_id,
+                },
+            )
+            # This is a security violation attempt. We must stop here.
+            # We don't want to tell the user that the token is valid but belongs to someone else.
+            # A generic "Forbidden" is appropriate.
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied",
+            )
+
+        token_repo = RefreshTokenRepository(db)
+        db_token = await token_repo.get_by_jti(jti)
+
+        if not db_token or db_token.is_revoked:
+            # If token is not in DB or already revoked, the goal is already met.
+            # This can happen if a user tries to revoke the same token twice.
+            return
+        
+        # Additional check to ensure DB record owner matches
+        if db_token.user_id != current_user.id:
+             await log_security_event(
+                db=db,
+                event_type="AUTH_REVOKE_FAILURE",
+                user_id=current_user.id,
+                ip_address=ip_address,
+                details={
+                    "reason": "db_owner_mismatch",
+                    "jti": jti,
+                },
+            )
+             raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied",
+            )
+
+        db_token.revoked_at = datetime.now(timezone.utc)
+        await db.commit()
+
+        await log_security_event(
+            db=db,
+            event_type="AUTH_REVOKE_SUCCESS",
+            user_id=current_user.id,
+            ip_address=ip_address,
+            details={"revoked_jti": jti},
+        )
         
