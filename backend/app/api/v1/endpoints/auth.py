@@ -143,4 +143,27 @@ async def request_password_reset(
     )
     return JSONResponse(content=response)
 
-# TODO: Password Reset Confirmation Endpoint
+
+@router.post("/password-reset/confirm", status_code=status.HTTP_200_OK)
+@limiter.limit("25/15minutes")
+async def confirm_password_reset(
+    request: Request,
+    reset_data: PasswordResetConfirm,
+    db: AsyncSession = Depends(get_async_session)
+):
+    """
+    Confirm a password reset using a token.
+    
+    This endpoint allows a user to set a new password using the token sent
+    to their email. The token is single-use and expires after a configured
+    duration. On success, the user's password is updated. On failure, a generic
+    error is returned to prevent security risks.
+    """
+    response = await AuthService.confirm_password_reset(
+        db=db,
+        request=request,
+        ip_address=get_remote_address(request),
+        token=reset_data.token,
+        new_password=reset_data.new_password,
+    )
+    return JSONResponse(content=response)

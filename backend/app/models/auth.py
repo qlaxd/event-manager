@@ -2,8 +2,9 @@
 Authentication-related models for UCC Event Manager.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+import enum
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,6 +14,11 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.user import User
+
+
+class UserRole(str, enum.Enum):
+    # Add any necessary role constants here
+    pass
 
 
 class RefreshToken(Base):
@@ -136,7 +142,7 @@ class PasswordResetToken(Base):
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
     )
     expires_at = Column(
         DateTime(timezone=True),
@@ -172,7 +178,7 @@ class PasswordResetToken(Base):
     @property
     def is_expired(self) -> bool:
         """Check if token is expired."""
-        return datetime.utcnow() > self.expires_at
+        return datetime.now(timezone.utc) > self.expires_at
     
     @property
     def is_valid(self) -> bool:

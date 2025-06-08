@@ -219,6 +219,75 @@ class AuthService:
         return {"message": "If an account with that email exists, a password reset link has been sent."}
 
     @staticmethod
+    async def confirm_password_reset(
+        db: AsyncSession, request: Request, ip_address: str, token: str, new_password: str
+    ):
+        """
+        Confirms a password reset request and updates the user's password.
+        """
+        token_repo = PasswordResetTokenRepository(db)
+        user_repo = UserRepository(db)
+        
+        token_hash = AuthService._hash_token(token)
+        reset_token_record = await token_repo.get_by_token_hash(token_hash)
+
+        # Generic error to prevent token enumeration/validity attacks
+        invalid_token_exception = HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password reset token is invalid or has expired.",
+        )
+
+        if not reset_token_record:
+            AuthService.logger.warning("Password reset confirmation failed: token not found.", token_hash=token_hash)
+            raise invalid_token_exception
+        
+        if reset_token_record.expires_at < datetime.now(timezone.utc):
+            await token_repo.delete(reset_token_record)
+            AuthService.logger.warning("Password reset confirmation failed: token expired.", token_hash=token_hash)
+            raise invalid_token_exception
+
+        user = await user_repo.get_by_id(reset_token_record.user_id)
+        if not user or not user.is_active:
+            await token_repo.delete(reset_token_record)
+            AuthService.logger.warning(
+                "Password reset failed: user not found or inactive.",
+                user_id=reset_token_record.user_id,
+            )
+            raise invalid_token_exception
+            
+        # Validate password strength
+        is_valid, message = SecurityUtils.validate_password_strength(new_password)
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=message
+            )
+
+        # Update user's password
+        user.hashed_password = SecurityUtils.get_password_hash(new_password)
+        
+        # Invalidate the token
+        await token_repo.delete(reset_token_record)
+        
+        # Revoke all existing refresh tokens for the user for security
+        refresh_token_repo = RefreshTokenRepository(db)
+        await refresh_token_repo.revoke_all_for_user(user.id)
+        
+        await db.commit()
+
+        await log_security_event(
+            db=db,
+            event_type="PASSWORD_RESET_SUCCESS",
+            user_id=user.id,
+            ip_address=ip_address,
+            user_agent=request.headers.get("User-Agent"),
+        )
+        
+        AuthService.logger.info("User password reset successfully", user_id=user.id)
+
+        return {"message": "Your password has been reset successfully."}
+
+    @staticmethod
     async def refresh_token(
         db: AsyncSession,
         request: Request,
