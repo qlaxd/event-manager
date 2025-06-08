@@ -3,6 +3,7 @@ Event management endpoints for UCC Event Manager.
 """
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -86,7 +87,29 @@ async def list_events(
     )
 
 
+@router.get(
+    "/{event_id}",
+    response_model=event_schema.EventRead,
+    summary="Get Single Event",
+    description="Get details of a specific event by its ID.",
+)
+async def get_event(
+    event_id: UUID,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Retrieves a single event by its unique ID.
+
+    The endpoint ensures that the user requesting the event is the owner.
+    """
+    service = EventService(db)
+    event = await service.get_event_by_id(
+        event_id=event_id, current_user=current_user
+    )
+    return event
+
+
 # TODO: Implement other event endpoints
-# - GET /events/{event_id}
 # - PATCH /events/{event_id}
 # - DELETE /events/{event_id} 

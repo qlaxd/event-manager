@@ -97,3 +97,16 @@ class EventRepository:
         events = result.scalars().all()
         
         return events, total
+
+    async def get_by_id(self, *, event_id: UUID) -> Event | None:
+        """
+        Fetches a single event by its ID.
+
+        :param event_id: The ID of the event to fetch.
+        :return: The Event object if found, otherwise None.
+        """
+        query = select(Event).where(
+            Event.id == event_id, Event.deleted_at.is_(None)
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()

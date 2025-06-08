@@ -5,6 +5,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException, status
 
 from app.models.event import Event
 from app.models.user import User
@@ -76,3 +77,22 @@ class EventService:
             from_date=from_date,
             to_date=to_date,
         )
+
+    async def get_event_by_id(self, *, event_id: UUID, current_user: User) -> Event:
+        """
+        Retrieves a single event by its ID, ensuring it belongs to the current user.
+
+        :param event_id: The ID of the event to retrieve.
+        :param current_user: The user requesting the event.
+        :raises HTTPException: If the event is not found or does not belong to the user.
+        :return: The requested event.
+        """
+        db_event = await self.repository.get_by_id(event_id=event_id)
+
+        if not db_event or db_event.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Event not found",
+            )
+        
+        return db_event
