@@ -117,3 +117,30 @@ async def revoke_refresh_token(
     return JSONResponse(content={"message": "Token revoked successfully"})
 
 
+# Password Management Endpoints
+
+@router.post("/password-reset/request", status_code=status.HTTP_200_OK)
+@limiter.limit("3/hour")
+async def request_password_reset(
+    request: Request,
+    reset_request: PasswordResetRequest,
+    db: AsyncSession = Depends(get_async_session)
+):
+    """
+    Request a password reset token.
+    
+    This endpoint initiates the password reset process. It accepts an email address
+    and, if a corresponding active user account exists, sends an email with a
+    password reset link. To prevent user enumeration attacks, this endpoint
+    will always return a successful response, regardless of whether the email
+    address is in the system or not.
+    """
+    response = await AuthService.request_password_reset(
+        db=db,
+        request=request,
+        ip_address=get_remote_address(request),
+        email=reset_request.email.lower().strip(),
+    )
+    return JSONResponse(content=response)
+
+

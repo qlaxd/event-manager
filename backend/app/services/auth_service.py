@@ -20,6 +20,8 @@ from app.core.config import settings
 import structlog
 from app.models.auth import RefreshToken
 from app.repositories.refresh_token_repository import RefreshTokenRepository
+from app.repositories.password_reset_token_repository import PasswordResetTokenRepository
+from app.services.email_service import send_password_reset_email
 
 
 class AuthService:
@@ -156,6 +158,65 @@ class AuthService:
             "refresh_token": refresh_token,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         }
+
+    @staticmethod
+    async def request_password_reset(
+        db: AsyncSession, request: Request, ip_address: str, email: str
+    ):
+        """
+        Handles a password reset request.
+        Generates a token, saves it, and sends a reset email.
+        """
+        user_repo = UserRepository(db)
+        user = await user_repo.get_by_email(email)
+
+        # To prevent user enumeration attacks, we don't reveal if the user was found.
+        # We will proceed as if we are sending an email, but only do so if the user exists.
+        if user and user.is_active:
+            try:
+                # Generate a secure token
+                reset_token = secrets.token_urlsafe(32)
+                token_hash = AuthService._hash_token(reset_token)
+
+                # Store the token hash in the database
+                token_repo = PasswordResetTokenRepository(db)
+                await token_repo.create_token(
+                    user_id=user.id,
+                    token_hash=token_hash,
+                    expires_in_minutes=settings.PASSWORD_RESET_EXPIRE_MINUTES,
+                )
+
+                # Send the password reset email
+                email_sent = await send_password_reset_email(
+                    email=user.email, name=user.full_name, token=reset_token
+                )
+
+                await log_security_event(
+                    db=db,
+                    event_type="PASSWORD_RESET_REQUEST",
+                    user_id=user.id,
+                    ip_address=ip_address,
+                    details={"email": email, "email_sent": email_sent},
+                )
+
+                if email_sent:
+                    AuthService.logger.info("Password reset email sent", email=email)
+                else:
+                    AuthService.logger.error("Password reset request failed, email could not be sent", email=email)
+            except Exception as e:
+                AuthService.logger.error(
+                    "Error during password reset process",
+                    email=email,
+                    error=str(e),
+                )
+        else:
+            AuthService.logger.info(
+                "Password reset requested for non-existent or inactive user",
+                email=email,
+            )
+        
+        # Always return a generic success message
+        return {"message": "If an account with that email exists, a password reset link has been sent."}
 
     @staticmethod
     async def refresh_token(

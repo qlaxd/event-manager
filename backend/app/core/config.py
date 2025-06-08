@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     
     # API Settings
     API_V1_PREFIX: str = "/api/v1"
+    FRONTEND_URL: AnyHttpUrl = "http://localhost:3000"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -43,6 +44,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "RS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 60
     
     # JWT Keys
     JWT_PRIVATE_KEY_PATH: Optional[Path] = None
@@ -79,6 +81,7 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = None
     
     # Email Settings
+    SMTP_ENABLED: bool = True
     SMTP_HOST: str
     SMTP_PORT: int = 587
     SMTP_USERNAME: str
