@@ -1,0 +1,101 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "user",
+    "collectionId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+    "dateExported": "2025-06-09T10:58:29.222Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "2abe309b-1dd0-483e-ac0e-5f977eaee8a5",
+            "colId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+            "containerId": "",
+            "name": "/users/me",
+            "url": "http://localhost:8000/api/v1/users/me",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2025-06-09T10:00:03.549Z",
+            "modified": "2025-06-09T10:27:25.881Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQ2ODQxNSwiaWF0IjoxNzQ5NDY0ODE1LCJ0eXBlIjoiYWNjZXNzIn0.J31Kh_rTtZp20kjZ3kceTaglsE99ZbZFCsf_MKgRU5oKT2VXdob3Cloaoppan5is2yDmoaM28q9wk6yCkpBtEFB7kq2HnfhSR4JKhI1EdPkniKvC_hBBgPGrfg715q6u-w0hWtcZ1p5kfR_hmttcad1DcwCCiHAqwSxGc4HhoVfTujlkV7usI_I71FCryoIGmlJSK7yGnBviFnlRNo2YYYCO9bKaQmZXmGHbPRB7tPLfPir1HPsXhdqvqqzim6vN47JNroPgUMe_f6yOF7RcqRV7LMe4wldgS1Yexxn61n1woyds0qOiI-chokSbOKfaiL7xkW5H6pyMxGUm1BN_FFD27EMYMRaP4JgOMlZMIuEuHIEt1bfSA3ITHhR-qI4iliH54WrzMQJwf19dq-TqvIMhEWCsCnsRMWourrKeFRcbQEUaEGUz3YkEBqcKyLfwPYYe-oPNIr-vp4amlZ42wPi2p_a-YChh8-n8SHFCDYseEx2iH_wnb3p7JfXypIlJtZpoAnSXVfOOhw-qKnIdqBStfJ1UCsiAXejjMZRYy1z7vb9qIlJJEoHHgGmCnu3Iibo7ohftO6rtK28x7qNMpJsKjaNX7_OYULao9k3tSG2WoKfbYGyJ9nOLIz_m0XUTLyxPvtp8DsN421t2zkdUGt29qV6FPGmM2RjD5dSrH54"
+            }
+        },
+        {
+            "_id": "b70088f9-f509-4364-b641-13cd17b230e1",
+            "colId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+            "containerId": "",
+            "name": "/users/me",
+            "url": "http://localhost:8000/api/v1/users/me",
+            "method": "PATCH",
+            "sortNum": 30000,
+            "created": "2025-06-09T10:31:07.734Z",
+            "modified": "2025-06-09T10:33:23.905Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"full_name\": \"TESZT ELEK VAGYOK\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQ2ODQxNSwiaWF0IjoxNzQ5NDY0ODE1LCJ0eXBlIjoiYWNjZXNzIn0.J31Kh_rTtZp20kjZ3kceTaglsE99ZbZFCsf_MKgRU5oKT2VXdob3Cloaoppan5is2yDmoaM28q9wk6yCkpBtEFB7kq2HnfhSR4JKhI1EdPkniKvC_hBBgPGrfg715q6u-w0hWtcZ1p5kfR_hmttcad1DcwCCiHAqwSxGc4HhoVfTujlkV7usI_I71FCryoIGmlJSK7yGnBviFnlRNo2YYYCO9bKaQmZXmGHbPRB7tPLfPir1HPsXhdqvqqzim6vN47JNroPgUMe_f6yOF7RcqRV7LMe4wldgS1Yexxn61n1woyds0qOiI-chokSbOKfaiL7xkW5H6pyMxGUm1BN_FFD27EMYMRaP4JgOMlZMIuEuHIEt1bfSA3ITHhR-qI4iliH54WrzMQJwf19dq-TqvIMhEWCsCnsRMWourrKeFRcbQEUaEGUz3YkEBqcKyLfwPYYe-oPNIr-vp4amlZ42wPi2p_a-YChh8-n8SHFCDYseEx2iH_wnb3p7JfXypIlJtZpoAnSXVfOOhw-qKnIdqBStfJ1UCsiAXejjMZRYy1z7vb9qIlJJEoHHgGmCnu3Iibo7ohftO6rtK28x7qNMpJsKjaNX7_OYULao9k3tSG2WoKfbYGyJ9nOLIz_m0XUTLyxPvtp8DsN421t2zkdUGt29qV6FPGmM2RjD5dSrH54"
+            }
+        },
+        {
+            "_id": "60de3cce-01ac-449a-9a14-53b920be6e84",
+            "colId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+            "containerId": "",
+            "name": "/user/me/change-password",
+            "url": "http://localhost:8000/api/v1/users/me/change-password",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2025-06-09T10:38:36.947Z",
+            "modified": "2025-06-09T10:39:39.124Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"current_password\": \"TesztJelszo123\",\n  \"new_password\": \"TesztJelszo123\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQ2ODQxNSwiaWF0IjoxNzQ5NDY0ODE1LCJ0eXBlIjoiYWNjZXNzIn0.J31Kh_rTtZp20kjZ3kceTaglsE99ZbZFCsf_MKgRU5oKT2VXdob3Cloaoppan5is2yDmoaM28q9wk6yCkpBtEFB7kq2HnfhSR4JKhI1EdPkniKvC_hBBgPGrfg715q6u-w0hWtcZ1p5kfR_hmttcad1DcwCCiHAqwSxGc4HhoVfTujlkV7usI_I71FCryoIGmlJSK7yGnBviFnlRNo2YYYCO9bKaQmZXmGHbPRB7tPLfPir1HPsXhdqvqqzim6vN47JNroPgUMe_f6yOF7RcqRV7LMe4wldgS1Yexxn61n1woyds0qOiI-chokSbOKfaiL7xkW5H6pyMxGUm1BN_FFD27EMYMRaP4JgOMlZMIuEuHIEt1bfSA3ITHhR-qI4iliH54WrzMQJwf19dq-TqvIMhEWCsCnsRMWourrKeFRcbQEUaEGUz3YkEBqcKyLfwPYYe-oPNIr-vp4amlZ42wPi2p_a-YChh8-n8SHFCDYseEx2iH_wnb3p7JfXypIlJtZpoAnSXVfOOhw-qKnIdqBStfJ1UCsiAXejjMZRYy1z7vb9qIlJJEoHHgGmCnu3Iibo7ohftO6rtK28x7qNMpJsKjaNX7_OYULao9k3tSG2WoKfbYGyJ9nOLIz_m0XUTLyxPvtp8DsN421t2zkdUGt29qV6FPGmM2RjD5dSrH54"
+            }
+        },
+        {
+            "_id": "579de655-fb57-4cb8-96fd-77d2f5c80b1d",
+            "colId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+            "containerId": "",
+            "name": "/users/me/sessions",
+            "url": "http://localhost:8000/api/v1/users/me/sessions",
+            "method": "GET",
+            "sortNum": 60000,
+            "created": "2025-06-09T10:43:23.718Z",
+            "modified": "2025-06-09T10:54:25.863Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQ2OTk1NCwiaWF0IjoxNzQ5NDY2MzU0LCJ0eXBlIjoiYWNjZXNzIn0.cCQteIDpEGVE5d3yeSHTF3VVfewcE1Y4JvzcV-TROuzkF0gMGMvsnFvex57u5g_Boi2TCx1MBxitESX91tMLfF7TmFrkVyL1TU20h-5p8JANCV71WReuoSBY9TC0TxUyIODid2X_hCHoY3H6RjKAJeUPOfoa88kWlkJPvyexsLuX4oqFrf1SwD8RQDQEE-DWseysos_-QNPboCJLmELVLmq0PHkv2yqLv2yym2mKGJwmF0x4Uu4JSKmuaKatrzQNV-dV1vBRwMTt-w3qqibqEoxhqhAz2pkZew72e92EpvlDcmciZfPz_JKeT9MlcQjWijEnTX35fBmN_gXYTTIYFNN8r3EZwqthBRk2A94dhdl98CwLZ9ecfZGDAiT1cBvMg4-YDLVU2dM4SEl75YDCp3tdltr52QwZZFZlbZaTA-88WM3UPlrdlxTLlvf4TvwUow67tWEUBv6NNZov9jVIiGQrZGb6r-ZY2pH_geLG9bZhujgwyokMDutw7IMoBdbOj8BFBGdn9Mk9YRt1G9T4wWjBYGP9hDA5SRuPyfCEEB_pnu4NTHchBVK9PBcaLe_GunWnben-A2Pgh3PAoVQ4FH-NWCwCs_Wfaz1-d5U4o36whJ-vAJtK850sa3_s25LhX1vJ0SrsvxTxegJW_sS28rgIaEF9aUoMmR6N_SaAuTY"
+            }
+        },
+        {
+            "_id": "1a011622-cae8-4aff-b9cc-dde6c251b9be",
+            "colId": "c89fe0df-5af4-4979-a402-ffa2413fe814",
+            "containerId": "",
+            "name": "/users/me/sessons/{session_id}",
+            "url": "http://localhost:8000/api/v1/users/me/sessions/cb38a06e-d052-45f2-b4be-d629e6d17c0b",
+            "method": "DELETE",
+            "sortNum": 80000,
+            "created": "2025-06-09T10:56:48.260Z",
+            "modified": "2025-06-09T10:57:30.865Z",
+            "headers": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQ2OTk1NCwiaWF0IjoxNzQ5NDY2MzU0LCJ0eXBlIjoiYWNjZXNzIn0.cCQteIDpEGVE5d3yeSHTF3VVfewcE1Y4JvzcV-TROuzkF0gMGMvsnFvex57u5g_Boi2TCx1MBxitESX91tMLfF7TmFrkVyL1TU20h-5p8JANCV71WReuoSBY9TC0TxUyIODid2X_hCHoY3H6RjKAJeUPOfoa88kWlkJPvyexsLuX4oqFrf1SwD8RQDQEE-DWseysos_-QNPboCJLmELVLmq0PHkv2yqLv2yym2mKGJwmF0x4Uu4JSKmuaKatrzQNV-dV1vBRwMTt-w3qqibqEoxhqhAz2pkZew72e92EpvlDcmciZfPz_JKeT9MlcQjWijEnTX35fBmN_gXYTTIYFNN8r3EZwqthBRk2A94dhdl98CwLZ9ecfZGDAiT1cBvMg4-YDLVU2dM4SEl75YDCp3tdltr52QwZZFZlbZaTA-88WM3UPlrdlxTLlvf4TvwUow67tWEUBv6NNZov9jVIiGQrZGb6r-ZY2pH_geLG9bZhujgwyokMDutw7IMoBdbOj8BFBGdn9Mk9YRt1G9T4wWjBYGP9hDA5SRuPyfCEEB_pnu4NTHchBVK9PBcaLe_GunWnben-A2Pgh3PAoVQ4FH-NWCwCs_Wfaz1-d5U4o36whJ-vAJtK850sa3_s25LhX1vJ0SrsvxTxegJW_sS28rgIaEF9aUoMmR6N_SaAuTY"
+            }
+        }
+    ],
+    "ref": "_OYdrCc8RjD1m0o7_0a_6ZqA1U14dtAqxMJtHBSW6P0MzX87U58Z0gvwtLM9d3zj7YXDpCWQbECrKFdPqYHCQg"
+}
