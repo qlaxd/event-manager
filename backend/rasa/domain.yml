@@ -1,0 +1,31 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - ask_create_event
+  - ask_edit_event
+  - ask_delete_event
+  - ask_help
+
+responses:
+  utter_greet:
+    - text: "Hey! I am the UCC Event Manager assistant. How can I help?"
+  utter_goodbye:
+    - text: "Goodbye!"
+  utter_iamabot:
+    - text: "I am a bot, powered by Rasa."
+  utter_help:
+    - text: "I can help you with creating, editing, and deleting events. What would you like to do?"
+  utter_create_event_info:
+    - text: "To create a new event, click the 'Add Event' button on your dashboard and fill in the required fields: title and occurrence date/time. You can also add an optional description."
+  utter_edit_event_info:
+    - text: "To edit an event, find the event in your list and click the edit icon. You can only update the description of an event."
+  utter_delete_event_info:
+    - text: "To delete an event, find it in your list and click the delete icon. You will be asked to confirm before the event is permanently removed."
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true 

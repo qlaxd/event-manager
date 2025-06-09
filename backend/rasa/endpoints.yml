@@ -1,0 +1,38 @@
+# This file contains the credentials for the voice & chat platforms
+# which your bot is connected to.
+# https://rasa.com/docs/rasa/messaging-and-voice-channels
+
+rest:
+#  # This endpoint is enabled once you uncomment it.
+#  # It is a test endpoint that connects to a custom rest endpoint.
+#  # For more info see https://rasa.com/docs/rasa/messaging-and-voice-channels/custom-connectors
+#  custom_rest:
+#    url: "http://localhost:5000/webhooks/custom_rest"
+#    token: "my-secret-token"
+#    method: "post"
+
+#action_endpoint:
+#  url: "http://localhost:5055/webhook"
+
+#tracker_store:
+#    type: redis
+#    url: <url of the redis instance>
+#    db: <number of the database>
+#    password: <password of the redis instance>
+#    use_ssl: <whether to use ssl>
+
+#lock_store:
+#    type: redis
+#    url: <url of the redis instance>
+#    db: <number of the database>
+#    password: <password of the redis instance>
+#    use_ssl: <whether to use ssl>
+
+#event_broker:
+#  url: localhost
+#  username:
+#  password:
+#  queue:
+
+action_endpoint:
+  url: http://action-server:5055/webhook 

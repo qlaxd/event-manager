@@ -1,0 +1,64 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - good morning
+    - good evening
+    - hey there
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - see you around
+    - see you later
+
+- intent: affirm
+  examples: |
+    - yes
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+
+- intent: deny
+  examples: |
+    - no
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+
+- intent: ask_create_event
+  examples: |
+    - How do I create a new event?
+    - How can I add an event?
+    - What is the process for creating an event?
+    - I want to make a new event
+    - create event
+
+- intent: ask_edit_event
+  examples: |
+    - How do I edit an event?
+    - How can I update an event?
+    - Can I change an event's title?
+    - I need to modify an event
+
+- intent: ask_delete_event
+  examples: |
+    - How do I delete an event?
+    - How can I remove an event?
+    - I want to get rid of an event
+    - delete event
+
+- intent: ask_help
+  examples: |
+    - help
+    - what can you do?
+    - I need assistance
+    - can you help me? 
