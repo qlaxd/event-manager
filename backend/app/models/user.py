@@ -85,6 +85,16 @@ class User(Base):
         nullable=True,
     )
     
+    # Login tracking
+    last_login_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    last_login_ip = Column(
+        String(45), # Supports IPv6
+        nullable=True,
+    )
+    
     # Timestamps
     created_at = Column(
         DateTime(timezone=True),

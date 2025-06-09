@@ -54,6 +54,7 @@ COPY --from=builder /app/.venv /app/.venv
 COPY app app
 COPY alembic alembic
 COPY alembic.ini alembic.ini
+COPY keys keys
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

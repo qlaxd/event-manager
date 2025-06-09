@@ -39,6 +39,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/ucc_events
       REDIS_URL: redis://redis:6379/0
+      RASA_URL: http://rasa:5005
       ENVIRONMENT: development
       DEBUG: "true"
     ports:
@@ -48,10 +49,13 @@ services:
       - ./alembic:/app/alembic
       - ./tests:/app/tests
       - ./schemas:/app/schemas
+      - ./scripts:/app/scripts
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rasa:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
@@ -64,8 +68,14 @@ services:
       - "5005:5005"
     volumes:
       - ./rasa:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     depends_on:
-      - action-server
+      action-server:
+        condition: service_started
     command: run --enable-api --cors "*" --debug
 
   action-server:
@@ -76,6 +86,11 @@ services:
       - "5055:5055"
     volumes:
       - ./rasa/actions:/app/actions
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5055/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   postgres_data:
