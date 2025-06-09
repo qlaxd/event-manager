@@ -1,0 +1,176 @@
+{
+    "info": {
+        "_postman_id": "e9e8e347-839f-458a-9586-4e77e41c3f42",
+        "name": "events",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": ""
+    },
+    "item": [
+        {
+            "name": "/events",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "http://localhost:8000/api/v1/events",
+                    "path": [
+                        "api",
+                        "v1",
+                        "events"
+                    ],
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmY4NmM1ZC0yNmZlLTQ3MTQtYmFhMS01ZTRiZGI4ZGViMmQiLCJlbWFpbCI6ImxhamtvbGV2aUBwcm90b25tYWlsLmNvbSIsImV4cCI6MTc0OTQxNTEzNSwiaWF0IjoxNzQ5NDExNTM1LCJ0eXBlIjoiYWNjZXNzIn0.g8VWdJYq9znpCCqQu8HWh1gm_so7qNyMk170pINBm8-ix6ryF-Hyzzkyoz8tW3QT-9_LblMeSQUjDee6YsarbtBHZ7GwH5LULuLiNDCMKU97sjtZuVIIs5uSssqCjVb94hwj9dqMizKzTMzFG8n3Zvtx6EW4kN7fC8cC2ubp73Z8rirb9N3zB72qs5yKpAgRRdRsJyrgmFHKu-LpxYyw0i4z6IYD9a8ugqqtguf6xLAsHGXlwVelejuNfyOBjBrhteyIHlpPDSiXVzfpnUntJAFcjns8E_BBQEoZPnttvxUMtyklqcusnh4oxTqfkRYtldXPOS_FZ3PTlyCwfdQdO0Xz3XTDcLc8nTsKCQTdZWvzs55gw0yG0FV-sNAXDuI9TIKXrp5fRtpWaLOtmUQXbSTlQFAQItcMvcJn-Sv1KWwNJjS8gNNXswV9I8pK351RGB6-8_HxzM9OnwVwuoRu6M387nwDSIMr2BTxBCB3Yss4lFerxC299enuC30tvBok2qR9TCtkYIx4h1TFvtLgl2YNhb3t0qmmdZ1LBzVfDMZTUXz_O3QyUK9h7lQ1hbJMnJu0qw2GaLIrNPJCUKKqxJ20gPf0rzod6zOAuPngvMrnAi71EHjrrE2Jqw9LsReDlHneCXKW8vaqT81Gu6Zi74c4SU8IzJELqdmecUjtX9M",
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "/events",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://localhost:8000/api/v1/events/",
+                    "path": [
+                        "api",
+                        "v1",
+                        "events"
+                    ],
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "body": {
+                    "mode": "raw",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    },
+                    "raw": "{\n  \"title\": \"Team Meeting\",\n  \"occurrence\": \"2024-02-15T14:30:00Z\",\n  \"description\": \"Weekly team sync meeting\"\n}"
+                },
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk",
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "/events/{event_id}",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+                    "path": [
+                        "api",
+                        "v1",
+                        "events",
+                        "0efa35f7-3a92-4099-a6c3-9c61792299b8"
+                    ],
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk",
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "/events/{event_id}",
+            "request": {
+                "method": "PATCH",
+                "url": {
+                    "raw": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+                    "path": [
+                        "api",
+                        "v1",
+                        "events",
+                        "0efa35f7-3a92-4099-a6c3-9c61792299b8"
+                    ],
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "body": {
+                    "mode": "raw",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    },
+                    "raw": "{\n  \"title\": \"ez csak egy teszt event\",\n  \"description\": \"ez egy teszt disc \"\n}"
+                },
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk",
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "/events/{event_id}",
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "http://localhost:8000/api/v1/events/0efa35f7-3a92-4099-a6c3-9c61792299b8",
+                    "path": [
+                        "api",
+                        "v1",
+                        "events",
+                        "0efa35f7-3a92-4099-a6c3-9c61792299b8"
+                    ],
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhjZTdmOC1kOWZiLTRiNzctYjdiZC1lNGYzYTljYzUxNjAiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE3NDk0MTkwMjAsImlhdCI6MTc0OTQxNTQyMCwidHlwZSI6ImFjY2VzcyJ9.ltMhz0H2DPEyUFJzqbKzbyrE4beC17xh23jNZkJSHjGju0K7r5jjEdiDfJUiP6jWF-FPJ7_IKds1JyjQ8mdhwjXpbrpwsEX4uHMuIlYOcwpQuzQ6auPUs235xpgrJwXddSZDHTDgNBGTw0qSZueVgMvOQYtORND4HtfzUih2EwaFsaks2IsQXJvzopVlOyudpdVOyPp4JURo2cSZ_1DBA-TJtiU5OaGrNGzSf7RQ52Jkvl_Ovwvqmhp_bAjI0AtMV9L2OZkN5dit3f6NRclh0jni7sQeFoJV_5wW3bYfs5b3bwiecmGPuYvEaUoZeBrhM7PMmaHUQyVzGjXtQlR8pv7y5MVe9FMQ9FnKEexfw3B1S-0hdCkjuScIocZnJ3RktjgyWDaSQcS6GlCZ_zb1d0otV4MsZ0lZcdA_T55_q_PYRFRgNZDutgI7aGoeyXx2ku6iQkdQZoYJE427J9fgB-7uC4y_fmsi73oQ6Cg5H15IYt-w8nV1im05IeSH4HHXmgHak0oShqogldXx3e2ylOYBeSbW95F651Ch-Dsp3pWD7WMQVeKiygAWBO5JUOB5vNF3Ft3-MU3lIrb_VSoNFS1-FQWIpxHaKsAqqv69Om42-OxssNazq0QOzCSUaknJ0eJpSkffjlb7X1fbIRWduYnCXrGn4SkMF32rh5gkxlk",
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -20,11 +20,10 @@ class UserCreate(UserBase):
 # Schema for updating a user
 class UserUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=1, max_length=100, example="John Doe")
-    email: Optional[EmailStr] = Field(None, example="user@example.com")
 
 
 # Schema for user data returned by the API
-class User(UserBase):
+class UserRead(UserBase):
     id: UUID
     is_active: bool
     mfa_enabled: bool
@@ -32,10 +31,10 @@ class User(UserBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Schema for user data as stored in the database
-class UserInDB(User):
-    password_hash: str
+class UserInDB(UserRead):
+    hashed_password: str
     mfa_secret: Optional[str] = None 

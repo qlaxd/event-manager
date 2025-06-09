@@ -1,5 +1,6 @@
 """Pydantic schemas for password-related operations."""
 from pydantic import BaseModel, EmailStr, Field, validator
+from app.core.security import SecurityUtils
 
 
 class PasswordResetRequest(BaseModel):
@@ -28,4 +29,18 @@ class PasswordResetConfirm(BaseModel):
         common_passwords = {'password', '12345678', 'qwerty', 'password123'}
         if v.lower() in common_passwords:
             raise ValueError('Password is too common')
+        return v 
+
+
+class PasswordChange(BaseModel):
+    """Schema for changing a user's password."""
+    current_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
+
+    @validator("new_password")
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password strength."""
+        is_valid, message = SecurityUtils.validate_password_strength(v)
+        if not is_valid:
+            raise ValueError(message)
         return v 

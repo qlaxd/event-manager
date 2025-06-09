@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import structlog
 from app.models.user import User
+from schemas.user import UserUpdate
 
 
 class UserRepository:
@@ -39,3 +40,26 @@ class UserRepository:
         stmt = select(User).where(User.email == email.lower())
         result = await self._db_session.execute(stmt)
         return result.scalar_one_or_none()
+    
+    async def update(self, user: User, data: UserUpdate) -> User:
+        """
+        Updates a user's information in the database.
+
+        Args:
+            user: The user object to update.
+            data: The data to update the user with.
+
+        Returns:
+            The updated user object.
+        """
+        update_data = data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(user, field, value)
+        
+        self._db_session.add(user)
+        await self._db_session.commit()
+        await self._db_session.refresh(user)
+        
+        self.logger.info("User updated successfully", user_id=user.id)
+        
+        return user

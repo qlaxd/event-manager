@@ -1,9 +1,11 @@
 # API Specifications: UCC Event Manager
 
 ## 1. Overview
+
 This document defines the RESTful API specifications for the UCC Event Manager system. The API provides secure endpoints for user authentication, event management, helpdesk functionality, and administrative operations.
 
 ### 1.1 Base Information
+
 - **Base URL**: `https://api.ucc-event-manager.com/api/v1`
 - **Protocol**: HTTPS only (TLS 1.2+)
 - **Authentication**: OAuth2.0 Password Flow with JWT tokens
@@ -11,6 +13,7 @@ This document defines the RESTful API specifications for the UCC Event Manager s
 - **API Version**: v1
 
 ### 1.2 Security Requirements
+
 - All endpoints require HTTPS
 - Authentication required for all protected endpoints
 - Rate limiting applied to prevent abuse
@@ -25,9 +28,11 @@ This document defines the RESTful API specifications for the UCC Event Manager s
 ### 2.1 OAuth2.0 Token Endpoint
 
 #### POST /auth/token
+
 Authenticate user and issue JWT tokens.
 
 **Request:**
+
 ```json
 {
   "grant_type": "password",
@@ -38,6 +43,7 @@ Authenticate user and issue JWT tokens.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -49,6 +55,7 @@ Authenticate user and issue JWT tokens.
 ```
 
 **Response (401 Unauthorized):**
+
 ```json
 {
   "error": "invalid_grant",
@@ -57,6 +64,7 @@ Authenticate user and issue JWT tokens.
 ```
 
 **Response (423 Locked):**
+
 ```json
 {
   "error": "mfa_required",
@@ -67,9 +75,11 @@ Authenticate user and issue JWT tokens.
 ### 2.2 Token Refresh
 
 #### POST /auth/refresh
+
 Refresh an expired access token using a refresh token.
 
 **Request:**
+
 ```json
 {
   "grant_type": "refresh_token",
@@ -78,6 +88,7 @@ Refresh an expired access token using a refresh token.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -90,14 +101,17 @@ Refresh an expired access token using a refresh token.
 ### 2.3 Token Revocation
 
 #### POST /auth/revoke
+
 Revoke a refresh token (logout).
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "token": "def502008b14e1e6b9b9c7a5c9e5f6a2b1c3d4e5f6...",
@@ -106,6 +120,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Token revoked successfully"
@@ -115,9 +130,11 @@ Authorization: Bearer <access_token>
 ### 2.4 Password Reset Request
 
 #### POST /auth/password-reset/request
+
 Request a password reset token.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com"
@@ -125,6 +142,7 @@ Request a password reset token.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Password reset email sent if account exists"
@@ -134,9 +152,11 @@ Request a password reset token.
 ### 2.5 Password Reset Confirmation
 
 #### POST /auth/password-reset/confirm
+
 Reset password using the token from email.
 
 **Request:**
+
 ```json
 {
   "token": "abc123def456ghi789jkl012mno345pqr678stu901",
@@ -145,6 +165,7 @@ Reset password using the token from email.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Password reset successfully"
@@ -152,6 +173,7 @@ Reset password using the token from email.
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "invalid_token",
@@ -166,14 +188,17 @@ Reset password using the token from email.
 ### 3.1 Enable MFA
 
 #### POST /auth/mfa/enable
+
 Enable MFA for the authenticated user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "password": "currentpassword123"
@@ -181,6 +206,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "secret": "JBSWY3DPEHPK3PXP",
@@ -196,14 +222,17 @@ Authorization: Bearer <access_token>
 ### 3.2 Verify MFA Setup
 
 #### POST /auth/mfa/verify
+
 Verify MFA setup with TOTP code.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "mfa_code": "123456"
@@ -211,6 +240,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "MFA enabled successfully"
@@ -220,14 +250,17 @@ Authorization: Bearer <access_token>
 ### 3.3 Disable MFA
 
 #### POST /auth/mfa/disable
+
 Disable MFA for the authenticated user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "password": "currentpassword123",
@@ -236,6 +269,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "MFA disabled successfully"
@@ -249,14 +283,17 @@ Authorization: Bearer <access_token>
 ### 4.1 Get Current User Profile
 
 #### GET /users/me
+
 Get the authenticated user's profile information.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -272,14 +309,17 @@ Authorization: Bearer <access_token>
 ### 4.2 Update User Profile
 
 #### PATCH /users/me
+
 Update the authenticated user's profile.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "full_name": "John Smith"
@@ -287,6 +327,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -302,14 +343,17 @@ Authorization: Bearer <access_token>
 ### 4.3 Change Password
 
 #### POST /users/me/change-password
+
 Change the authenticated user's password.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "current_password": "oldpassword123",
@@ -318,6 +362,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Password changed successfully"
@@ -331,14 +376,17 @@ Authorization: Bearer <access_token>
 ### 5.1 List User Events
 
 #### GET /events
+
 Get a list of events for the authenticated user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Query Parameters:**
+
 - `limit` (integer, optional): Number of events to return (default: 50, max: 100)
 - `offset` (integer, optional): Number of events to skip (default: 0)
 - `sort` (string, optional): Sort field (`occurrence`, `created_at`, `title`) (default: `occurrence`)
@@ -347,6 +395,7 @@ Authorization: Bearer <access_token>
 - `to_date` (string, optional): Filter events to date (ISO 8601 format)
 
 **Response (200 OK):**
+
 ```json
 {
   "events": [
@@ -376,14 +425,17 @@ Authorization: Bearer <access_token>
 ### 5.2 Get Single Event
 
 #### GET /events/{event_id}
+
 Get details of a specific event.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174001",
@@ -396,6 +448,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "event_not_found",
@@ -406,14 +459,17 @@ Authorization: Bearer <access_token>
 ### 5.3 Create Event
 
 #### POST /events
+
 Create a new event for the authenticated user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "title": "Team Meeting",
@@ -423,6 +479,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174001",
@@ -435,6 +492,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "validation_error",
@@ -449,14 +507,17 @@ Authorization: Bearer <access_token>
 ### 5.4 Update Event
 
 #### PATCH /events/{event_id}
+
 Update an existing event (only description can be modified).
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "description": "Updated weekly team sync meeting with new agenda"
@@ -464,6 +525,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174001",
@@ -478,9 +540,11 @@ Authorization: Bearer <access_token>
 ### 5.5 Delete Event
 
 #### DELETE /events/{event_id}
+
 Delete an existing event.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -488,6 +552,7 @@ Authorization: Bearer <access_token>
 **Response (204 No Content)**
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "event_not_found",
@@ -502,14 +567,17 @@ Authorization: Bearer <access_token>
 ### 6.1 Send Chat Message
 
 #### POST /helpdesk/chat
+
 Send a message to the helpdesk chatbot.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "message": "How do I create a new event?",
@@ -518,6 +586,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "response": "To create a new event, click the 'Add Event' button on your dashboard and fill in the required fields: title and occurrence date/time. You can also add an optional description.",
@@ -535,14 +604,17 @@ Authorization: Bearer <access_token>
 ### 6.2 Escalate to Human Agent
 
 #### POST /helpdesk/escalate
+
 Escalate the conversation to a human agent.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "session_id": "sess_123e4567-e89b-12d3-a456-426614174000",
@@ -552,6 +624,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "ticket_id": "TKT-2024-001234",
@@ -563,14 +636,17 @@ Authorization: Bearer <access_token>
 ### 6.3 Get Chat History
 
 #### GET /helpdesk/sessions/{session_id}/messages
+
 Get chat history for a session.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "session_id": "sess_123e4567-e89b-12d3-a456-426614174000",
@@ -599,14 +675,17 @@ Authorization: Bearer <access_token>
 ### 7.1 Start Voice Session
 
 #### POST /helpdesk/voice/session
+
 Start a new voice helpdesk session.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "preferred_language": "en-US"
@@ -614,6 +693,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "session_id": "voice_sess_123e4567-e89b-12d3-a456-426614174000",
@@ -626,14 +706,17 @@ Authorization: Bearer <access_token>
 ### 7.2 Process Voice Message
 
 #### POST /helpdesk/voice/process
+
 Process a voice message (from phone or web).
 
 **Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request:**
+
 ```json
 {
   "session_id": "voice_sess_123e4567-e89b-12d3-a456-426614174000",
@@ -644,6 +727,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "transcription": "How do I create a new event?",
@@ -660,9 +744,11 @@ Authorization: Bearer <access_token>
 ### 8.1 Health Check
 
 #### GET /health
+
 Check API health status (no authentication required).
 
 **Response (200 OK):**
+
 ```json
 {
   "status": "healthy",
@@ -677,14 +763,17 @@ Check API health status (no authentication required).
 ### 8.2 System Information
 
 #### GET /system/info
+
 Get system information (admin access required).
 
 **Headers:**
+
 ```
 Authorization: Bearer <admin_access_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "version": "1.0.0",
@@ -702,6 +791,7 @@ Authorization: Bearer <admin_access_token>
 ## 9. Error Responses
 
 ### 9.1 Standard Error Format
+
 All error responses follow this format:
 
 ```json
@@ -718,26 +808,27 @@ All error responses follow this format:
 
 ### 9.2 Common Error Codes
 
-| Status Code | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `bad_request` | Invalid request format or parameters |
-| 400 | `validation_error` | Input validation failed |
-| 401 | `unauthorized` | Authentication required |
-| 401 | `invalid_token` | Invalid or expired token |
-| 403 | `forbidden` | Insufficient permissions |
-| 404 | `not_found` | Resource not found |
-| 409 | `conflict` | Resource conflict (e.g., duplicate email) |
-| 422 | `unprocessable_entity` | Request valid but cannot be processed |
-| 429 | `rate_limit_exceeded` | Too many requests |
-| 500 | `internal_server_error` | Server error |
-| 502 | `bad_gateway` | External service error |
-| 503 | `service_unavailable` | Service temporarily unavailable |
+| Status Code | Error Code              | Description                               |
+| ----------- | ----------------------- | ----------------------------------------- |
+| 400         | `bad_request`           | Invalid request format or parameters      |
+| 400         | `validation_error`      | Input validation failed                   |
+| 401         | `unauthorized`          | Authentication required                   |
+| 401         | `invalid_token`         | Invalid or expired token                  |
+| 403         | `forbidden`             | Insufficient permissions                  |
+| 404         | `not_found`             | Resource not found                        |
+| 409         | `conflict`              | Resource conflict (e.g., duplicate email) |
+| 422         | `unprocessable_entity`  | Request valid but cannot be processed     |
+| 429         | `rate_limit_exceeded`   | Too many requests                         |
+| 500         | `internal_server_error` | Server error                              |
+| 502         | `bad_gateway`           | External service error                    |
+| 503         | `service_unavailable`   | Service temporarily unavailable           |
 
 ---
 
 ## 10. Rate Limiting
 
 ### 10.1 Rate Limit Headers
+
 All responses include rate limiting headers:
 
 ```
@@ -749,14 +840,14 @@ X-RateLimit-Window: 3600
 
 ### 10.2 Rate Limits by Endpoint Category
 
-| Category | Limit | Window |
-|----------|-------|--------|
-| Authentication | 5 requests | 15 minutes |
-| Password Reset | 3 requests | 60 minutes |
-| Events CRUD | 100 requests | 60 minutes |
-| Helpdesk Chat | 50 requests | 60 minutes |
-| Voice Helpdesk | 20 requests | 60 minutes |
-| General API | 1000 requests | 60 minutes |
+| Category       | Limit         | Window     |
+| -------------- | ------------- | ---------- |
+| Authentication | 5 requests    | 15 minutes |
+| Password Reset | 3 requests    | 60 minutes |
+| Events CRUD    | 100 requests  | 60 minutes |
+| Helpdesk Chat  | 50 requests   | 60 minutes |
+| Voice Helpdesk | 20 requests   | 60 minutes |
+| General API    | 1000 requests | 60 minutes |
 
 ---
 
@@ -778,14 +869,17 @@ Referrer-Policy: strict-origin-when-cross-origin
 ## 12. CORS Configuration
 
 ### 12.1 Allowed Origins
+
 - `https://app.ucc-event-manager.com` (production frontend)
 - `https://staging.ucc-event-manager.com` (staging frontend)
 - `http://localhost:3000` (development only)
 
 ### 12.2 Allowed Methods
+
 - `GET`, `POST`, `PATCH`, `DELETE`, `OPTIONS`
 
 ### 12.3 Allowed Headers
+
 - `Authorization`, `Content-Type`, `X-Requested-With`
 
 ---
@@ -793,17 +887,20 @@ Referrer-Policy: strict-origin-when-cross-origin
 ## 13. Data Validation Rules
 
 ### 13.1 User Data
+
 - **Email**: Valid email format, max 255 characters, case-insensitive
 - **Password**: 8-128 characters, must contain uppercase, lowercase, number
 - **Full Name**: 1-255 characters, no HTML tags
 - **MFA Code**: 6 digits
 
 ### 13.2 Event Data
+
 - **Title**: 1-255 characters, required, no HTML tags
 - **Occurrence**: Valid ISO 8601 datetime, required
 - **Description**: 0-10,000 characters, optional, basic HTML sanitization
 
 ### 13.3 Helpdesk Data
+
 - **Message**: 1-1,000 characters, required
 - **Session ID**: Valid UUID format
 
@@ -812,10 +909,12 @@ Referrer-Policy: strict-origin-when-cross-origin
 ## 14. Pagination
 
 ### 14.1 Request Parameters
+
 - `limit`: Number of items to return (default: 50, max: 100)
 - `offset`: Number of items to skip (default: 0)
 
 ### 14.2 Response Format
+
 ```json
 {
   "data": [...],
@@ -831,6 +930,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 ## 15. Webhooks (Future Enhancement)
 
 ### 15.1 Event Notifications
+
 Webhook endpoints for real-time notifications:
 
 - `event.created`
@@ -840,6 +940,7 @@ Webhook endpoints for real-time notifications:
 - `helpdesk.escalated`
 
 ### 15.2 Webhook Format
+
 ```json
 {
   "event": "event.created",
