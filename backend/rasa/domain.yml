@@ -9,6 +9,7 @@ intents:
   - ask_edit_event
   - ask_delete_event
   - ask_help
+  - ask_iamabot
 
 responses:
   utter_greet:

@@ -81,7 +81,7 @@ services:
     depends_on:
       action-server:
         condition: service_started
-    command: run --enable-api --cors "*" --debug
+    command: run -m models --enable-api --cors "*" --debug
 
   action-server:
     image: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.3
@@ -95,7 +95,7 @@ services:
     ports:
       - "5055:5055"
     volumes:
-      - ./rasa/actions:/app/actions
+      - ./rasa:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5055/health"]
       interval: 30s

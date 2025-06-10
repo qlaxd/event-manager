@@ -61,4 +61,11 @@ nlu:
     - help
     - what can you do?
     - I need assistance
-    - can you help me? 
+    - can you help me?
+
+- intent: ask_iamabot
+  examples: |
+    - Are you a bot?
+    - Are you a human?
+    - What are you?
+    - Who are you? 

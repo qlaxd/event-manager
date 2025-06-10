@@ -22,12 +22,13 @@ stories:
 
 - story: ask for help
   steps:
-  - intent: greet
-  - action: utter_greet
   - intent: ask_help
   - action: utter_help
-  - intent: goodbye
-  - action: utter_goodbye
+
+- story: bot identity
+  steps:
+  - intent: ask_iamabot
+  - action: utter_iamabot
 
 - story: simple greet and goodbye
   steps:
