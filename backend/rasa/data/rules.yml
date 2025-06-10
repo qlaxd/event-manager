@@ -1,7 +1,12 @@
 version: "3.1"
 
 rules:
-  - rule: Handle low NLU confidence with LLM fallback
-    intent: nlu_fallback
+  - rule: Handle NLU fallback
     steps:
-      - action: action_llm_fallback 
+    - intent: nlu_fallback
+    - action: action_llm_fallback
+
+  - rule: Direct affirm to LLM
+    steps:
+    - intent: affirm
+    - action: action_llm_fallback 

@@ -8,15 +8,27 @@ from typing import Any, Text, Dict, List
 import requests
 import logging
 import os
+import json
+import time
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.events import UserUtteranceReverted, BotUttered
 
 logger = logging.getLogger(__name__)
 
 # Get the Ollama base URL from an environment variable for flexibility,
 # defaulting to the local development setup.
-OLLAMA_API_BASE = os.getenv("OLLAMA_API_BASE", "http://localhost:11434")
+OLLAMA_API_BASE = os.getenv("OLLAMA_API_BASE", "http://ollama:11434")
+# Use our echo model as the default model
+DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "echo:latest")
+
+# A simple in-memory cache to store pending responses
+# In a production environment, this should be replaced with Redis or similar
+pending_responses = {}
+executor = ThreadPoolExecutor(max_workers=5)
 
 class ActionLLMFallback(Action):
     def name(self) -> Text:
@@ -27,43 +39,83 @@ class ActionLLMFallback(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        # Let the user know the bot is processing the request
-        dispatcher.utter_message(response="utter_please_wait")
-
         # Get the last user message
         user_message = tracker.latest_message.get('text')
+        user_id = tracker.sender_id
+        
+        logger.info(f"Redirecting to Ollama LLM: '{user_message}'")
 
+        # Let the user know the bot is processing the request immediately
+        dispatcher.utter_message(text="I'm processing your request. This might take a moment...")
+        
+        # Start the LLM request in the background
+        executor.submit(self.get_llm_response, user_message, user_id, dispatcher)
+        
+        # Return immediately with UserUtteranceReverted to not influence further conversations
+        return [UserUtteranceReverted()]
+    
+    def get_llm_response(self, user_message: str, user_id: str, dispatcher: CollectingDispatcher) -> None:
+        """Process the LLM request in the background and send the response when ready."""
+        
         # Construct a clear prompt for the LLM
         prompt = (
-            "You are a helpful and creative assistant for the 'UCC Event Manager' application. "
-            "Your primary goal is to answer user questions about using the application or about general topics. "
-            "If you don't know the answer or the question is unrelated, just say that you cannot help with that. "
-            f"Please provide a helpful and concise response to the following user query: '{user_message}'"
+            "I'm sorry, but I don't have specific information about that. As the UCC Event Manager assistant, "
+            "I can help you with creating, managing, and attending events. I can assist with registration, "
+            "scheduling, and other event-related tasks. How can I help you with event management today?"
         )
 
         # Define the payload for the Ollama generate API
         payload = {
-            "model": "deepseek-r1:8b",
+            "model": DEFAULT_MODEL,
             "prompt": prompt,
             "stream": False  # Get the full response at once
         }
 
         try:
-            # Make the API call to the Ollama server
-            response = requests.post(f"{OLLAMA_API_BASE}/api/generate", json=payload, timeout=45)
+            # Check if Ollama is available
+            health_url = f"{OLLAMA_API_BASE}/"
+            try:
+                health_check = requests.head(health_url, timeout=5)
+                if health_check.status_code != 200:
+                    logger.error(f"Ollama server health check failed with status {health_check.status_code}")
+                    raise Exception("Ollama server health check failed")
+            except requests.exceptions.RequestException as he:
+                logger.error(f"Could not connect to Ollama server for health check: {he}")
+                raise Exception("Ollama server unavailable")
+            
+            # Log the request URL for debugging
+            request_url = f"{OLLAMA_API_BASE}/api/generate"
+            logger.info(f"Sending request to Ollama API: {request_url}")
+            
+            # Make the API call to the Ollama server with a longer timeout
+            response = requests.post(request_url, json=payload, timeout=60)
+            
+            # Log the response status and headers for debugging
+            logger.info(f"Ollama API response status: {response.status_code}")
+            logger.info(f"Ollama API response headers: {response.headers}")
+            
             response.raise_for_status()
 
+            # Log the raw response for debugging
+            logger.debug(f"Ollama API raw response: {response.text[:500]}...")
+            
             response_data = response.json()
             llm_response = response_data.get("response")
 
             if llm_response:
+                logger.info(f"Successful LLM response received (first 100 chars): {llm_response[:100]}...")
+                # Send the LLM response directly to the user through the dispatcher
                 dispatcher.utter_message(text=llm_response.strip())
             else:
-                logger.error("Ollama response was empty.")
+                logger.error(f"Ollama response was empty or missing 'response' field. Full response: {json.dumps(response_data)}")
                 dispatcher.utter_message(text="I'm sorry, I'm having trouble thinking of a response right now.")
 
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logger.error(f"Ollama fallback request failed: {e}")
-            dispatcher.utter_message(text="I'm sorry, I couldn't connect to my advanced thinking module. Please try again later.")
-
-        return [] 
+            # Add more detailed error information
+            if isinstance(e, requests.exceptions.RequestException) and hasattr(e, 'response') and e.response:
+                logger.error(f"Response status code: {e.response.status_code}")
+                logger.error(f"Response content: {e.response.text[:500]}")
+            
+            # Provide a more user-friendly fallback response
+            dispatcher.utter_message(text="I'm sorry, I don't have specific information about that. As the UCC Event Manager assistant, I can help with creating and managing events. How can I assist you with event management today?") 

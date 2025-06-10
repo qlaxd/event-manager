@@ -41,6 +41,11 @@ nlu:
     - What is the process for creating an event?
     - I want to make a new event
     - create event
+    - szeretnék létrehozni egy eseményt
+    - új eseményt akarok
+    - esemény létrehozás
+    - hogyan hozhatok létre eseményt?
+    - rendezvényt szeretnék szervezni
 
 - intent: ask_edit_event
   examples: |
@@ -68,4 +73,27 @@ nlu:
     - Are you a bot?
     - Are you a human?
     - What are you?
-    - Who are you? 
+    - Who are you?
+
+- intent: nlu_fallback
+  examples: |
+    - nem értem
+    - nem tudom miről beszélsz
+    - ez értelmetlen
+    - mit mondasz?
+    - Ask ollama if I could meet my friends
+    - Ask AI about the weather
+    - Tell me about quantum physics
+    - What is the capital of France?
+    - How do I cook pasta?
+    - What's the meaning of life?
+    - Tell me a joke
+    - Who won the last World Cup?
+    - How tall is Mount Everest?
+    - When was the internet invented?
+    - PLEASE KILL ME
+    - What do you think about politics?
+    - Can you help me with my homework?
+    - Tell me about yourself
+    - How do neural networks work?
+    - What is the best programming language? 

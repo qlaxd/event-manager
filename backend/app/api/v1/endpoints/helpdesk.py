@@ -2,14 +2,17 @@
 Helpdesk endpoints for UCC Event Manager.
 Provides an interface to the chatbot.
 """
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.security import OAuth2PasswordBearer
+import structlog
 
 from app.models.user import User
-from app.core.security import get_current_active_user
+from app.core.security import get_current_active_user, get_current_user
 from schemas.helpdesk import ChatMessageRequest, ChatMessageResponse
 from app.services.helpdesk_service import HelpdeskService
 
+logger = structlog.get_logger(__name__)
 router = APIRouter()
 
 @router.post(
@@ -31,6 +34,24 @@ async def send_chat_message(
     - **session_id**: An optional session ID to maintain conversation context.
     """
     response = await HelpdeskService.talk_to_bot(user_id=str(current_user.id), request=chat_request)
+    return response
+
+@router.get("/responses/{response_id}", response_model=ChatMessageResponse)
+async def get_pending_response(
+    response_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieve a pending response by its ID.
+    """
+    response = await HelpdeskService.get_pending_response(response_id)
+    
+    if not response:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Response not found"
+        )
+    
     return response
 
 # TODO: Implement escalation and chat history endpoints
