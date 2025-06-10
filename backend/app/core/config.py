@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: AnyHttpUrl = "http://localhost:3000"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     
+    
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str) and not v.startswith("["):

@@ -35,4 +35,12 @@ rest:
 #  queue:
 
 action_endpoint:
-  url: http://action-server:5055/webhook 
+  url: http://action-server:5055/webhook
+
+model_groups:
+  enterprise_search_generation:
+    provider: "openai"
+    model: "gpt-4o"
+  enterprise_search_embeddings:
+    provider: "openai"
+    model: "text-embedding-ada-002" 

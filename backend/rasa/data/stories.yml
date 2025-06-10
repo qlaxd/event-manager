@@ -1,0 +1,37 @@
+version: "3.1"
+
+stories:
+- story: happy path
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_create_event
+  - action: utter_create_event_info
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: ask how to edit event
+  steps:
+  - intent: ask_edit_event
+  - action: utter_edit_event_info
+
+- story: ask how to delete event
+  steps:
+  - intent: ask_delete_event
+  - action: utter_delete_event_info
+
+- story: ask for help
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_help
+  - action: utter_help
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: simple greet and goodbye
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: goodbye
+  - action: utter_goodbye 

@@ -61,9 +61,14 @@ services:
 
   # Rasa chatbot (optional, comment out if not needed)
   rasa:
-    image: rasa/rasa:3.6.21
+    image: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.3
     container_name: ucc_rasa
-    user: "${UID}:${GID}"
+    user: "root"
+    env_file:
+      - .env
+    environment:
+      RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "5005:5005"
     volumes:
@@ -79,9 +84,14 @@ services:
     command: run --enable-api --cors "*" --debug
 
   action-server:
-    image: rasa/rasa-sdk:3.6.2
+    image: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.3
     container_name: ucc_action_server
-    user: "${UID}:${GID}"
+    user: "root"
+    env_file:
+      - .env
+    environment:
+      RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "5055:5055"
     volumes:
@@ -91,6 +101,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    command: ["run", "actions"]
 
 volumes:
   postgres_data:
