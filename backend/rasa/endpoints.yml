@@ -11,12 +11,13 @@ rest:
 #    token: "my-secret-token"
 #    method: "post"
 
-#action_endpoint:
-#  url: "http://localhost:5055/webhook"
+action_endpoint:
+  url: http://action-server:5055/webhook
 
 #tracker_store:
 #    type: redis
 #    url: <url of the redis instance>
+#    port: <port of the redis instance>
 #    db: <number of the database>
 #    password: <password of the redis instance>
 #    use_ssl: <whether to use ssl>
@@ -34,13 +35,31 @@ rest:
 #  password:
 #  queue:
 
-#action_endpoint:
-#  url: http://action-server:5055/webhook
-#
-#model_groups:
-#  enterprise_search_generation:
-#    provider: "openai"
-#    model: "gpt-4o"
-#  enterprise_search_embeddings:
-#    provider: "openai"
-#    model: "text-embedding-ada-002" 
+# This is for the new LLM-based entity extraction
+llm:
+  default:
+    type: ollama
+    url: "http://host.docker.internal:11434"
+    model: "deepseek-r1:8b"
+  model_groups:
+    - id: ollama_deepseek
+      models:
+        - provider: ollama
+          model: deepseek-r1:8b
+          # Use an environment variable for flexibility.
+          # For local dev (ollama on host), set in .env: OLLAMA_API_BASE="http://host.docker.internal:11434"
+          # For containerized dev, docker-compose sets it to: OLLAMA_API_BASE="http://ollama:11434"
+          api_base: "${OLLAMA_API_BASE}"
+      router:
+        routing_strategy: least-busy
+
+# The model groups below were for a different feature (Enterprise Search)
+# and can be removed or kept if that feature is also being used.
+# I will comment them out for now to ensure the new Ollama config is used.
+# model_groups:
+#   enterprise_search_generation:
+#     provider: "openai"
+#     model: "gpt-4o"
+#   enterprise_search_embeddings:
+#     provider: "openai"
+#     model: "text-embedding-ada-002" 

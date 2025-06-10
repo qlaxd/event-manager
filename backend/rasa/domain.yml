@@ -10,6 +10,7 @@ intents:
   - ask_delete_event
   - ask_help
   - ask_iamabot
+  - nlu_fallback
 
 responses:
   utter_greet:
@@ -26,6 +27,11 @@ responses:
     - text: "To edit an event, find the event in your list and click the edit icon. You can only update the description of an event."
   utter_delete_event_info:
     - text: "To delete an event, find it in your list and click the delete icon. You will be asked to confirm before the event is permanently removed."
+  utter_please_wait:
+    - text: "One moment while I check on that for you..."
+
+actions:
+  - action_llm_fallback
 
 session_config:
   session_expiration_time: 60

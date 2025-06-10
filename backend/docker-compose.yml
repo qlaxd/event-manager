@@ -69,10 +69,18 @@ services:
     environment:
       RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OLLAMA_API_BASE: "http://host.docker.internal:11434"
     ports:
       - "5005:5005"
     volumes:
-      - ./rasa:/app
+      - ./rasa/models:/app/models
+      - ./rasa/data:/app/data
+      - ./rasa/config.yml:/app/config.yml
+      - ./rasa/domain.yml:/app/domain.yml
+      - ./rasa/endpoints.yml:/app/endpoints.yml
+      - ./rasa_entrypoint.sh:/app/entrypoint.sh
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5005/"]
       interval: 30s
@@ -81,10 +89,11 @@ services:
     depends_on:
       action-server:
         condition: service_started
-    command: run -m models --enable-api --cors "*" --debug
+    entrypoint: ["/app/entrypoint.sh"]
 
   action-server:
-    image: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.3
+    build:
+      context: ./rasa/actions
     container_name: ucc_action_server
     user: "root"
     env_file:
@@ -92,17 +101,31 @@ services:
     environment:
       RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OLLAMA_API_BASE: "http://host.docker.internal:11434"
     ports:
       - "5055:5055"
     volumes:
-      - ./rasa:/app
+      - ./rasa/actions:/app/actions
+      - ./rasa/endpoints.yml:/app/endpoints.yml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5055/health"]
       interval: 30s
       timeout: 10s
       retries: 5
-    command: ["run", "actions"]
+    command: ["start", "--actions", "actions", "--cors", "*", "--debug"]
+
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    container_name: ucc_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    network_mode: "host"
 
 volumes:
   postgres_data:
-  redis_data: 
+  redis_data:
+  ollama_data:

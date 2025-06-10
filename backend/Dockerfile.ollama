@@ -1,0 +1,11 @@
+FROM ollama/ollama:latest
+
+# Create a directory for our custom scripts
+WORKDIR /app
+COPY ./ollama_entrypoint.sh .
+
+# Make the script executable
+RUN chmod +x ollama_entrypoint.sh
+
+# Set the entrypoint to our custom script
+ENTRYPOINT ["/app/ollama_entrypoint.sh"] 
