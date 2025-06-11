@@ -1,51 +1,40 @@
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'ucc_access_token'
-const REFRESH_TOKEN_KEY = 'ucc_refresh_token'
 const USER_KEY = 'ucc_user'
 
+// In-memory token storage for access token (more secure than localStorage or sessionStorage)
+let inMemoryToken: string | null = null;
+
 // Token storage helpers
-export const setToken = (type: 'access' | 'refresh', token: string, rememberMe: boolean = false): void => {
-  const key = type === 'access' ? ACCESS_TOKEN_KEY : REFRESH_TOKEN_KEY
-  
-  if (rememberMe) {
-    // Store in localStorage for persistent storage
-    localStorage.setItem(key, token)
-    // Also store in sessionStorage for current session
-    sessionStorage.setItem(key, token)
-  } else {
-    // Store only in sessionStorage
-    sessionStorage.setItem(key, token)
+export const setToken = (type: 'access', token: string): void => {
+  if (type === 'access') {
+    // Store access token in memory only, not in localStorage or sessionStorage
+    inMemoryToken = token;
   }
 }
 
 export const getToken = (type: 'access' | 'refresh'): string | null => {
-  const key = type === 'access' ? ACCESS_TOKEN_KEY : REFRESH_TOKEN_KEY
-  
-  // Check sessionStorage first
-  const sessionToken = sessionStorage.getItem(key)
-  if (sessionToken) return sessionToken
-  
-  // Fall back to localStorage
-  const localToken = localStorage.getItem(key)
-  if (localToken) {
-    // Copy to sessionStorage for faster access
-    sessionStorage.setItem(key, localToken)
+  if (type === 'access') {
+    // Return the in-memory token
+    return inMemoryToken;
+  } else if (type === 'refresh') {
+    // The refresh token is managed by the browser as an HttpOnly cookie
+    // We don't have direct access to it from JavaScript
+    return null;
   }
-  
-  return localToken
+  return null;
 }
 
-export const removeToken = (type: 'access' | 'refresh'): void => {
-  const key = type === 'access' ? ACCESS_TOKEN_KEY : REFRESH_TOKEN_KEY
-  sessionStorage.removeItem(key)
-  localStorage.removeItem(key)
+export const removeToken = (type: 'access'): void => {
+  if (type === 'access') {
+    inMemoryToken = null;
+  }
 }
 
 export const clearAllTokens = (): void => {
-  removeToken('access')
-  removeToken('refresh')
-  sessionStorage.removeItem(USER_KEY)
-  localStorage.removeItem(USER_KEY)
+  removeToken('access');
+  sessionStorage.removeItem(USER_KEY);
+  localStorage.removeItem(USER_KEY);
 }
 
 // JWT token helpers
@@ -96,16 +85,6 @@ export const isAuthenticated = (): boolean => {
   if (!accessToken) return false
   
   return !isTokenExpired(accessToken)
-}
-
-// Cross-tab synchronization
-export const setupAuthSync = (callback: () => void): void => {
-  window.addEventListener('storage', (event) => {
-    if (event.key === ACCESS_TOKEN_KEY || event.key === REFRESH_TOKEN_KEY) {
-      // Token changed in another tab
-      callback()
-    }
-  })
 }
 
 // Security headers

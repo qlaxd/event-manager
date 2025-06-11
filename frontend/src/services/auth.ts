@@ -7,7 +7,6 @@ interface TokenResponse {
   token_type: string
   expires_in: number
   scope?: string
-  mfa_required?: boolean
 }
 
 interface RefreshTokenRequest {
@@ -17,41 +16,67 @@ interface RefreshTokenRequest {
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>('/auth/token', credentials)
-    return response.data
+    // Transform to OAuth2 password flow format
+    const params = new URLSearchParams();
+    params.append('grant_type', 'password');
+    params.append('username', credentials.email);
+    params.append('password', credentials.password);
+    
+    if (credentials.mfa_code) {
+      params.append('mfa_code', credentials.mfa_code);
+    }
+    
+    const response = await apiClient.post<TokenResponse>('/auth/token', params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    
+    return response.data;
   }
 
-  async refreshToken(data: RefreshTokenRequest): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>('/auth/refresh', data)
-    return response.data
+  async refreshToken(refreshToken: string): Promise<TokenResponse> {
+    const params = new URLSearchParams();
+    params.append('grant_type', 'refresh_token');
+    params.append('refresh_token', refreshToken);
+    
+    const response = await apiClient.post<TokenResponse>('/auth/refresh', params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    
+    return response.data;
   }
 
   async getProfile(): Promise<User> {
-    const response = await apiClient.get<User>('/users/me')
-    return response.data
+    const response = await apiClient.get<User>('/users/me');
+    return response.data;
   }
 
-  async logout(): Promise<void> {
-    // Optional: Call backend logout endpoint
-    // await apiClient.post('/auth/logout')
+  async logout(token: string): Promise<void> {
+    await apiClient.post('/auth/revoke', {
+      token,
+      token_type_hint: 'refresh_token'
+    });
   }
 
   async requestPasswordReset(email: string): Promise<{ message: string }> {
-    const response = await apiClient.post<{ message: string }>('/auth/request-password-reset', {
+    const response = await apiClient.post<{ message: string }>('/auth/password-reset/request', {
       email
-    })
-    return response.data
+    });
+    return response.data;
   }
 
   async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    const response = await apiClient.post<{ message: string }>('/auth/reset-password', {
+    const response = await apiClient.post<{ message: string }>('/auth/password-reset/confirm', {
       token,
       new_password: newPassword
-    })
-    return response.data
+    });
+    return response.data;
   }
 
-  async setupMFA(): Promise<{
+  async enableMFA(password: string): Promise<{
     secret: string
     qr_code: string
     backup_codes: string[]
@@ -60,23 +85,26 @@ class AuthService {
       secret: string
       qr_code: string
       backup_codes: string[]
-    }>('/auth/mfa/setup')
-    return response.data
-  }
-
-  async verifyMFA(code: string): Promise<{ message: string }> {
-    const response = await apiClient.post<{ message: string }>('/auth/mfa/verify', {
-      code
-    })
-    return response.data
-  }
-
-  async disableMFA(password: string): Promise<{ message: string }> {
-    const response = await apiClient.post<{ message: string }>('/auth/mfa/disable', {
+    }>('/auth/mfa/enable', {
       password
-    })
-    return response.data
+    });
+    return response.data;
+  }
+
+  async verifyMFASetup(mfaCode: string): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('/auth/mfa/verify', {
+      mfa_code: mfaCode
+    });
+    return response.data;
+  }
+
+  async disableMFA(password: string, mfaCode: string): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('/auth/mfa/disable', {
+      password,
+      mfa_code: mfaCode
+    });
+    return response.data;
   }
 }
 
-export default new AuthService() 
+export default new AuthService(); 

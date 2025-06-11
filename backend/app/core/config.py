@@ -6,6 +6,7 @@ import secrets
 from typing import Any, List, Optional, Union
 from pathlib import Path
 
+
 from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -28,17 +29,15 @@ class Settings(BaseSettings):
     
     # API Settings
     API_V1_PREFIX: str = "/api/v1"
-    FRONTEND_URL: AnyHttpUrl = "http://localhost:3000"
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    FRONTEND_URL: AnyHttpUrl = "http://localhost:5173"
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:5173"]
     
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Any:
         if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        return []
+            return [i.strip() for i in v.split(",") if i.strip()]
+        return v
     
     # Security Settings
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -142,7 +141,7 @@ class Settings(BaseSettings):
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
         "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
+        #"Referrer-Policy": "strict-origin-when-cross-origin",
     }
     
 

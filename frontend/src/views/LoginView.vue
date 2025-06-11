@@ -228,22 +228,19 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
-    const response = await authStore.login({
+    await authStore.login({
       email: form.email,
       password: form.password,
       rememberMe: form.rememberMe
     })
     
-    if (response.mfa_required) {
-      showMFAModal.value = true
-    } else {
-      // Successful login without MFA
-      await router.push('/dashboard')
-    }
+    // Login successful - redirect to dashboard
+    await router.push('/dashboard')
   } catch (error: any) {
     if (error.response?.status === 401) {
       errorMessage.value = 'Invalid email or password'
     } else if (error.response?.status === 423) {
+      // MFA is required
       showMFAModal.value = true
     } else {
       errorMessage.value = error.response?.data?.error_description || 'An error occurred during login'
@@ -265,10 +262,14 @@ const handleMFAVerify = async (code: string) => {
       mfa_code: code
     })
     
-    showMFAModal.value = false
+    // MFA verification successful - redirect to dashboard
     await router.push('/dashboard')
   } catch (error: any) {
-    mfaError.value = error.response?.data?.error_description || 'Invalid verification code'
+    if (error.response?.status === 401) {
+      mfaError.value = 'Invalid verification code'
+    } else {
+      mfaError.value = error.response?.data?.error_description || 'Failed to verify code'
+    }
   } finally {
     loading.value = false
   }

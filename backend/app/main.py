@@ -3,6 +3,7 @@ Main FastAPI application for UCC Event Manager.
 """
 import logging
 from contextlib import asynccontextmanager
+import sys  # Add at the top if not already imported
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,8 @@ from app.core.config import settings, validate_settings
 from app.core.database import init_db, close_db
 from app.utils.logging import setup_logging
 from app.utils.exceptions import setup_exception_handlers
+import dotenv
+dotenv.load_dotenv()
 
 # Setup structured logging
 setup_logging()
@@ -122,11 +125,18 @@ async def add_request_id(request: Request, call_next):
     
     return response
 
+# Print loaded CORS origins for debugging
+print("DEBUG: BACKEND_CORS_ORIGINS =", settings.BACKEND_CORS_ORIGINS, file=sys.stderr)
+
+
+
 # Configure CORS
 if settings.BACKEND_CORS_ORIGINS:
+    print("DEBUG: Adding CORS middleware with origins:", [str(origin) for origin in settings.BACKEND_CORS_ORIGINS], file=sys.stderr)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        #allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=["http://localhost:5173"], # TODO: Remove this, this is for development only
         allow_credentials=True,
         allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Requested-With"],

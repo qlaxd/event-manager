@@ -4,11 +4,13 @@ import router from '@/router'
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
-  timeout: 30000 // 30 seconds
+  timeout: 10000, // 10 seconds
+  withCredentials: true // Important: Send cookies with requests (for refresh token)
 })
 
 // Track if we're currently refreshing the token
@@ -32,53 +34,8 @@ apiClient.interceptors.request.use(
     const token = getToken('access')
     
     if (token && config.headers) {
-      // Check if token is expired
-      if (isTokenExpired(token)) {
-        // Wait for token refresh if already in progress
-        if (isRefreshing) {
-          return new Promise(resolve => {
-            subscribeTokenRefresh((newToken: string) => {
-              config.headers!.Authorization = `Bearer ${newToken}`
-              resolve(config)
-            })
-          })
-        }
-        
-        // Otherwise, trigger token refresh
-        isRefreshing = true
-        
-        try {
-          const refreshToken = getToken('refresh')
-          if (!refreshToken) throw new Error('No refresh token')
-          
-          const response = await axios.post(`${config.baseURL}/auth/refresh`, {
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken
-          })
-          
-          const { access_token, refresh_token } = response.data
-          
-          // Store new tokens
-          setToken('access', access_token)
-          setToken('refresh', refresh_token)
-          
-          // Update current request
-          config.headers.Authorization = `Bearer ${access_token}`
-          
-          // Notify subscribers
-          onTokenRefreshed(access_token)
-          
-          isRefreshing = false
-        } catch (error) {
-          isRefreshing = false
-          removeToken('access')
-          removeToken('refresh')
-          router.push('/login')
-          return Promise.reject(error)
-        }
-      } else {
-        config.headers.Authorization = `Bearer ${token}`
-      }
+      // Add the token to the Authorization header
+      config.headers.Authorization = `Bearer ${token}`
     }
     
     return config
@@ -98,22 +55,22 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       
-      // Try to refresh token
-      const refreshToken = getToken('refresh')
-      if (refreshToken && !isRefreshing) {
+      // Only attempt to refresh the token if we're not already doing so
+      if (!isRefreshing) {
         isRefreshing = true
         
         try {
+          // The refresh token is sent automatically as an HttpOnly cookie
           const response = await axios.post(`${originalRequest.baseURL}/auth/refresh`, {
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken
+            grant_type: 'refresh_token'
+          }, {
+            withCredentials: true // Important: Send cookies with the request
           })
           
-          const { access_token, refresh_token } = response.data
+          const { access_token } = response.data
           
-          // Store new tokens
+          // Store new access token in memory
           setToken('access', access_token)
-          setToken('refresh', refresh_token)
           
           // Update failed request
           originalRequest.headers.Authorization = `Bearer ${access_token}`
@@ -128,10 +85,17 @@ apiClient.interceptors.response.use(
         } catch (refreshError) {
           isRefreshing = false
           removeToken('access')
-          removeToken('refresh')
           router.push('/login')
           return Promise.reject(refreshError)
         }
+      } else {
+        // Wait for the token to be refreshed
+        return new Promise(resolve => {
+          subscribeTokenRefresh((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            resolve(apiClient(originalRequest))
+          })
+        })
       }
     }
     

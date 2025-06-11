@@ -497,7 +497,7 @@ const handleSetupMFA = async () => {
   clearMFAErrors()
 
   try {
-    const response = await authService.setupMFA()
+    const response = await authService.enableMFA(passwordForm.current_password)
     
     mfaQRCode.value = response.qr_code
     mfaSecret.value = response.secret
@@ -517,7 +517,7 @@ const handleVerifyMFASetup = async () => {
   mfaLoading.value = true
 
   try {
-    await authService.verifyMFA(mfaVerificationCode.value)
+    await authService.verifyMFASetup(mfaVerificationCode.value)
     
     // Update user MFA status
     if (authStore.user) {
@@ -551,7 +551,7 @@ const handleConfirmDisableMFA = async () => {
   mfaLoading.value = true
 
   try {
-    await authService.disableMFA(mfaDisablePassword.value)
+    await authService.disableMFA(mfaDisablePassword.value, mfaVerificationCode.value)
     
     // Update user MFA status
     if (authStore.user) {

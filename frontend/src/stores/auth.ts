@@ -7,9 +7,7 @@ import { setToken, removeToken, getToken } from '@/utils/auth'
 interface AuthState {
   user: User | null
   accessToken: string | null
-  refreshToken: string | null
   isAuthenticated: boolean
-  rememberMe: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -34,16 +32,13 @@ export const useAuthStore = defineStore('auth', () => {
         mfa_code: credentials.mfa_code
       })
 
-      if (response.mfa_required) {
-        return { mfa_required: true }
-      }
-
-      // Store tokens
-      setToken('access', response.access_token, rememberMe.value)
-      setToken('refresh', response.refresh_token, rememberMe.value)
+      // Store tokens - access token in memory only, refresh token in httpOnly cookie (handled by backend)
+      setToken('access', response.access_token)
+      
+      // The refresh token is now managed as an HttpOnly cookie by the backend
+      // We don't need to store it in the frontend
       
       accessToken.value = response.access_token
-      refreshToken.value = response.refresh_token
 
       // Fetch user profile
       await fetchUser()
@@ -63,12 +58,10 @@ export const useAuthStore = defineStore('auth', () => {
         mfa_code: credentials.mfa_code
       })
 
-      // Store tokens
-      setToken('access', response.access_token, rememberMe.value)
-      setToken('refresh', response.refresh_token, rememberMe.value)
+      // Store access token in memory only
+      setToken('access', response.access_token)
       
       accessToken.value = response.access_token
-      refreshToken.value = response.refresh_token
 
       // Fetch user profile
       await fetchUser()
@@ -82,12 +75,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      // Optional: Call logout endpoint
-      // await authService.logout()
+      if (refreshToken.value) {
+        // Call backend logout endpoint to invalidate the refresh token
+        await authService.logout(refreshToken.value)
+      }
       
       // Clear tokens
       removeToken('access')
-      removeToken('refresh')
       
       // Clear state
       user.value = null
@@ -98,7 +92,6 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Logout error:', error)
       // Even if logout fails, clear local state
       removeToken('access')
-      removeToken('refresh')
       user.value = null
       accessToken.value = null
       refreshToken.value = null
@@ -121,17 +114,12 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('No refresh token available')
       }
 
-      const response = await authService.refreshToken({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken.value
-      })
+      const response = await authService.refreshToken(refreshToken.value)
 
-      // Update tokens
-      setToken('access', response.access_token, rememberMe.value)
-      setToken('refresh', response.refresh_token, rememberMe.value)
+      // Update access token in memory
+      setToken('access', response.access_token)
       
       accessToken.value = response.access_token
-      refreshToken.value = response.refresh_token
 
       return response
     } catch (error) {
@@ -143,8 +131,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initializeAuth = async () => {
-    // Check if we have tokens on app start
-    if (accessToken.value && refreshToken.value) {
+    // Check if we have an access token on app start
+    if (accessToken.value) {
       try {
         await fetchUser()
       } catch (error) {
@@ -168,7 +156,6 @@ export const useAuthStore = defineStore('auth', () => {
     // State
     user,
     accessToken,
-    refreshToken,
     rememberMe,
     
     // Computed
