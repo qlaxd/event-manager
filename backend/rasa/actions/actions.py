@@ -160,6 +160,9 @@ class ActionCreateEventFromLlm(Action):
         latest_message = tracker.latest_message
         entities = latest_message.get('entities', [])
         
+        # Log all extracted entities for debugging
+        logger.info(f"All extracted entities: {entities}")
+        
         # Create a dictionary to store the extracted values
         extracted_data = {}
         for entity in entities:
@@ -168,28 +171,28 @@ class ActionCreateEventFromLlm(Action):
             if entity_type and entity_value:
                 extracted_data[entity_type] = entity_value
                 
-        # Get extracted entities from slots (as backup)
+        # Get extracted entities from slots or extracted data
         title = tracker.get_slot("event_title") or extracted_data.get("event_title")
         description = tracker.get_slot("event_description") or extracted_data.get("event_description")
         occurrence_text = tracker.get_slot("event_occurrence_text") or extracted_data.get("event_occurrence_text")
         
-        # If still no title, try to extract one from the user's message
+        # If no title was extracted by the LLM, try to extract it from the user message
+        user_message = latest_message.get('text', '')
         if not title:
-            # Try to extract a title using improved patterns
-            user_message = latest_message.get('text', '')
+            # Clean up common prefixes that shouldn't be part of the title
             title_patterns = [
-                # Match "create an event for [TITLE]" pattern
-                r'(?:create|create an event for|make|add|schedule|létrehoz(?:ni)?)\s+(?:an?|egy)?\s*(?:event(?:et)?|esemény(?:t)?)?(?:\s+for)?\s+([\w\s]+?)(?:\s+(?:on|at|tomorrow|next|jövő|holnap)|$)',
+                # Match "create an event titled [TITLE]" pattern - better pattern with word boundary
+                r'(?:create|make|add|schedule)(?:\s+an?)?(?:\s+event)?(?:\s+titled)\s+([\w\s]+?)(?:\s+(?:for|on|at|tomorrow|next)|$)',
                 
-                # Match "[TITLE] event" pattern 
-                r'(?:a|an|egy)?\s*([\w\s]+?)\s+(?:event(?:et)?|esemény(?:t)?)\s+(?:on|at|tomorrow|next|jövő|holnap)',
+                # Match "create an event for [TITLE]" pattern
+                r'(?:create|make|add|schedule)(?:\s+an?)?(?:\s+event)?(?:\s+for)\s+([\w\s]+?)(?:\s+(?:on|at|tomorrow|next)|$)',
                 
                 # Match simple "dinner with X" pattern that's likely an event title
                 r'\b((?:dinner|lunch|breakfast|meeting|appointment|date|coffee|drinks|party|concert|movie|show)\s+(?:with|for|at|in)\s+[\w\s]+)\b',
                 
-                # Fallback to the original patterns
-                r'(?:event(?:et)?|esemény(?:t)?)\s+(?:a|az|egy)?\s*([\w\s]+?)(?:\s*,|\s*hogy|\s*\.|$)',
-                r'(?:létrehoz(?:ni)?)\s+(?:egy)?\s*(?:event(?:et)?|esemény(?:t)?)\s+(?:a|az)?\s*([\w\s]+?)(?:\s*,|\s*hogy|\s*\.|$)'
+                # More general patterns
+                r'event\s+(?:for|titled|named)\s+([\w\s]+?)(?:\s+(?:on|at|tomorrow|next)|$)',
+                r'esemény\s+(?:a|az|ezt)?\s+([\w\s]+?)(?:\s+(?:on|at|tomorrow|next)|$)'
             ]
             
             for pattern in title_patterns:
@@ -197,19 +200,50 @@ class ActionCreateEventFromLlm(Action):
                 if match and match.group(1):
                     title = match.group(1).strip()
                     break
+        
+        # If no description was extracted by the LLM, try to extract it from the user message
+        if not description and "description" in user_message.lower():
+            description_patterns = [
+                r'description(?:\s+(?:that|which))?\s+(?:says|tells|is)?\s+([\w\s,.]+?)(?:$|\.|\n)',
+                r'with\s+(?:a|the)?\s+description(?:\s+(?:that|which))?\s+([\w\s,.]+?)(?:$|\.|\n)'
+            ]
             
-            # If still no title and the message contains "dinner", "lunch", etc. just use that as the title
-            if not title:
-                event_keywords = ["dinner", "lunch", "breakfast", "meeting", "appointment", "date", "coffee", "drinks", "party", "concert", "movie", "show"]
-                for keyword in event_keywords:
-                    if keyword in user_message.lower():
-                        # Extract the keyword and a few words around it
-                        keyword_pattern = r'\b(' + keyword + r'(?:\s+\w+){0,3})\b'
-                        match = re.search(keyword_pattern, user_message, re.IGNORECASE)
-                        if match:
-                            title = match.group(1).strip()
-                            break
-                    
+            for pattern in description_patterns:
+                match = re.search(pattern, user_message, re.IGNORECASE)
+                if match and match.group(1):
+                    description = match.group(1).strip()
+                    break
+        
+        # If no occurrence text was extracted by the LLM, try to extract it from the user message
+        if not occurrence_text:
+            time_patterns = [
+                r'(?:on|at|for)\s+(tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?\w+|\w+\s+\d{1,2}(?:st|nd|rd|th)?)\s+(?:at\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)',
+                r'(tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?\w+|\w+\s+\d{1,2}(?:st|nd|rd|th)?)\s+(?:at\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)',
+                r'(?:at|for)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)(?:\s+(?:on|next|tomorrow)\s+(tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?\w+|\w+\s+\d{1,2}(?:st|nd|rd|th)?))?'
+            ]
+            
+            for pattern in time_patterns:
+                match = re.search(pattern, user_message, re.IGNORECASE)
+                if match:
+                    if match.group(2):
+                        occurrence_text = f"{match.group(1)} at {match.group(2)}"
+                    else:
+                        occurrence_text = match.group(1)
+                    break
+        
+        # Clean up the title if it contains "titled" or other prefixes
+        if title:
+            title_prefixes = ["titled ", "for ", "create ", "event ", "an event ", "a "]
+            for prefix in title_prefixes:
+                if title.lower().startswith(prefix):
+                    title = title[len(prefix):].strip()
+            
+            # Additional cleanup: if the title ends with "for" or similar prepositions, remove them
+            title_suffixes = [" for", " on", " at", " in"]
+            for suffix in title_suffixes:
+                if title.lower().endswith(suffix):
+                    title = title[:-len(suffix)].strip()
+        
         # Log the extracted entities
         logger.info(f"Extracted entities for event creation: title='{title}', description='{description}', occurrence='{occurrence_text}'")
         
