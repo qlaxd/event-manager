@@ -418,6 +418,7 @@ import DropdownItem from '@/components/ui/DropdownItem.vue'
 import Calendar from '@/components/ui/Calendar.vue'
 import { Sidebar } from '@/components/ui'
 import { RouterLink } from 'vue-router'
+import authService from '@/services/auth'
 
 const router = useRouter()
 
@@ -427,11 +428,17 @@ const helpQuery = ref('')
 const sidebarOpen = ref(false)
 const showQuickActions = ref(false)
 
+onMounted(async () => {
+  const profileData = await authService.getProfile()
+  currentUser.value = profileData
+})
+
 // Current user data (could come from a store like useAuthStore)
 const currentUser = ref({
   full_name: 'John Doe',
   email: 'john@example.com'
 })
+
 const showCreateEventModal = ref(false)
 const newEvent = ref({
   title: '',
