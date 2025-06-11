@@ -40,12 +40,12 @@ llm:
   default:
     type: ollama
     url: "http://host.docker.internal:11434"
-    model: "deepseek-r1:8b"
+    model: "llama3:8b"
   model_groups:
-    - id: ollama_deepseek
+    - id: ollama_llama
       models:
         - provider: ollama
-          model: deepseek-r1:8b
+          model: llama3:8b
           # Use an environment variable for flexibility.
           # For local dev (ollama on host), set in .env: OLLAMA_API_BASE="http://host.docker.internal:11434"
           # For containerized dev, docker-compose sets it to: OLLAMA_API_BASE="http://ollama:11434"

@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 # Get the Ollama base URL from an environment variable for flexibility,
 # defaulting to the local development setup.
 OLLAMA_API_BASE = os.getenv("OLLAMA_API_BASE", "http://ollama:11434")
-# Use our echo model as the default model
-DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "echo:latest")
+# Use our LLM model as the default model
+DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "llama3:8b")
 
 # A simple in-memory cache to store pending responses
 # In a production environment, this should be replaced with Redis or similar

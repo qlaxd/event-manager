@@ -70,7 +70,7 @@ services:
       RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OLLAMA_API_BASE: "http://ollama:11434"
-      OLLAMA_MODEL: "echo:latest"
+      OLLAMA_MODEL: "llama3:8b"
     ports:
       - "5055:5055"
     volumes:
@@ -98,7 +98,7 @@ services:
       RASA_PRO_LICENSE: ${RASA_PRO_LICENSE}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OLLAMA_API_BASE: "http://ollama:11434"
-      OLLAMA_MODEL: "echo:latest"
+      OLLAMA_MODEL: "llama3:8b"
     ports:
       - "5005:5005"
     volumes:
