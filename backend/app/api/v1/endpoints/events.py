@@ -5,13 +5,15 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Depends, Query, status
+from fastapi import APIRouter, Request, Depends, Query, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
 from schemas import event as event_schema
 from app.services.event_service import EventService
 from app.core import get_current_active_user, get_async_session
+from app.core.security import get_current_active_user_optional
+from app.utils.api_keys import get_service_api_key
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -24,29 +26,62 @@ limiter = Limiter(key_func=get_remote_address)
     response_model=event_schema.EventRead,
     status_code=status.HTTP_201_CREATED,
     summary="Create New Event",
-    description="Create a new event for the authenticated user.",
+    description="Create a new event for the authenticated user or via service API.",
 )
 @limiter.limit("10/minute")
 async def create_event(
     request: Request,
     event_in: event_schema.EventCreate,
     db: AsyncSession = Depends(get_async_session),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User | None = Depends(get_current_active_user_optional),
+    is_service: bool | None = Depends(get_service_api_key),
+    user_id: UUID | None = Query(None, description="User ID for service API calls"),
 ):
     """
     Creates a new event in the system.
 
-    This endpoint allows an authenticated user to create a new event associated
-    with their account.
+    This endpoint allows:
+    1. An authenticated user to create a new event associated with their account
+    2. A service (like Rasa) to create an event on behalf of a user using an API key
 
+    For user authentication:
+    - The user must be authenticated with a valid JWT token
+    - The event will be associated with the authenticated user
+
+    For service authentication:
+    - The service must provide a valid API key in the X-Service-API-Key header
+    - The service must specify the user_id in the request body or as a query parameter
+
+    Request body:
     - **`title`**: The title of the event (required).
     - **`occurrence`**: The date and time of the event in ISO 8601 format (required).
     - **`description`**: An optional description for the event.
+    - **`user_id`**: The ID of the user to create the event for (can be in body or query param).
     """
     service = EventService(db)
-    new_event = await service.create_event(
-        event_data=event_in, current_user=current_user
-    )
+    
+    # Determine the authentication method
+    if current_user:
+        # User is authenticated via JWT
+        new_event = await service.create_event(event_data=event_in, current_user=current_user)
+    elif is_service:
+        # Service is authenticated via API key
+        # Check for user_id in query parameter first, then in request body
+        service_user_id = user_id or event_in.user_id
+        if not service_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="user_id is required for service API calls (either in request body or as a query parameter)"
+            )
+        new_event = await service.create_event(event_data=event_in, user_id=service_user_id)
+    else:
+        # No valid authentication
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     return new_event
 
 

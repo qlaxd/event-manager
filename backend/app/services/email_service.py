@@ -218,3 +218,128 @@ async def send_welcome_email(
     except Exception as e:
         logger.error("Failed to send welcome email", email=email, error=str(e))
         return False 
+
+
+async def send_event_created_email(
+    email: str,
+    name: str,
+    event_title: str,
+    event_description: str,
+    event_occurrence: str,
+    event_id: str
+) -> bool:
+    """
+    Send event creation confirmation email to user.
+    
+    Args:
+        email: User's email address
+        name: User's full name
+        event_title: Title of the created event
+        event_description: Description of the created event
+        event_occurrence: Formatted date/time of the event
+        event_id: ID of the created event
+        
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    try:
+        subject = f"Event Created: {event_title}"
+        
+        # Format event URL
+        event_url = f"{settings.FRONTEND_URL}/events/{event_id}"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Event Created</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2c3e50;">Your Event Has Been Created</h2>
+                
+                <p>Hello {name},</p>
+                
+                <p>Your event has been successfully created in UCC Event Manager.</p>
+                 
+                <div style="background-color: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #3498db;">{event_title}</h3>
+                    <p><strong>When:</strong> {event_occurrence}</p>
+                    <p><strong>Description:</strong> {event_description}</p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{event_url}" 
+                       style="background-color: #3498db; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; display: inline-block;">
+                        View Event
+                    </a>
+                </div>
+                
+                <p>You can view and manage all your events in your UCC Event Manager dashboard.</p>
+                
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                
+                <p style="font-size: 12px; color: #666;">
+                    This is an automated message from UCC Event Manager.
+                    Please do not reply to this email.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+        Your Event Has Been Created
+        
+        Hello {name},
+        
+        Your event has been successfully created in UCC Event Manager.
+        
+        Event Details:
+        - Title: {event_title}
+        - When: {event_occurrence}
+        - Description: {event_description}
+        
+        View your event here: {event_url}
+        
+        You can view and manage all your events in your UCC Event Manager dashboard.
+        
+        ---
+        This is an automated message from UCC Event Manager.
+        """
+        
+        # Create message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = settings.SMTP_FROM_EMAIL
+        msg['To'] = email
+        
+        # Attach parts
+        text_part = MIMEText(text_content, 'plain')
+        html_part = MIMEText(html_content, 'html')
+        
+        msg.attach(text_part)
+        msg.attach(html_part)
+        
+        # Send email
+        if settings.SMTP_ENABLED:
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+                if settings.SMTP_TLS:
+                    server.starttls()
+                if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
+                    server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+                
+                server.send_message(msg)
+                
+            logger.info("Event creation email sent", email=email, event_title=event_title)
+            return True
+        else:
+            # In development, just log the event details
+            logger.info("Event creation email (dev mode)", email=email, event_title=event_title, event_url=event_url)
+            return True
+            
+    except Exception as e:
+        logger.error("Failed to send event creation email", email=email, event_title=event_title, error=str(e))
+        return False 

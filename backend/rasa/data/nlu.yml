@@ -75,6 +75,26 @@ nlu:
     - What are you?
     - Who are you?
 
+- intent: create_event_unstructured
+  examples: |
+    - csinálj egy eventet a hétvégi grillezésnek
+    - hozz létre egy új eseményt a jövő heti vizsgára
+    - create an event for me for tomorrow
+    - create an event for dinner with Anna
+    - new event: lunch meeting tomorrow
+    - set up an event for my dentist appointment
+    - add a new event for the team meeting
+    - I need an event for the conference next week
+    - please create an event for tomorrow named "meeting with John"
+    - i'm going to a party tomorrow
+    - I'm having dinner with my friends tomorrow
+    - I'm having dinner with Emily tomorrow, create an event for this
+    - Create an event for my meeting with John
+    - Make a new event for tomorrow's lunch
+    - Add an event for my doctor appointment next week
+    - Schedule a dinner with friends for Saturday
+
+
 - intent: nlu_fallback
   examples: |
     - nem értem
@@ -91,7 +111,6 @@ nlu:
     - Who won the last World Cup?
     - How tall is Mount Everest?
     - When was the internet invented?
-    - PLEASE KILL ME
     - What do you think about politics?
     - Can you help me with my homework?
     - Tell me about yourself

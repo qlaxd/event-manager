@@ -285,4 +285,47 @@ docker build -t ucc-event-manager-backend:latest .
 For issues and questions:
 - Check the API documentation at `/api/v1/docs`
 - Review logs for error details
-- Contact the development team 
+- Contact the development team
+
+## Agentic Event Creation Feature
+
+This feature allows users to create events by conversing naturally with the chatbot. The user can say something like "create an event for a barbecue this weekend", and the chatbot will extract the relevant details and create the event automatically.
+
+### How It Works
+
+1. The user makes a request to create an event in natural language
+2. The Rasa NLU system recognizes the intent as `create_event_unstructured`
+3. The LLM Entity Extractor component extracts entities from the message:
+   - `event_title`: The title of the event (e.g., "barbecue")
+   - `event_description`: Any description provided (e.g., "need to buy meat and vegetables")
+   - `event_occurrence_text`: When the event should occur (e.g., "this weekend")
+4. The custom action `action_create_event_from_llm` processes these entities:
+   - Parses the occurrence text into a datetime using `dateparser`
+   - Makes an authenticated API call to the backend to create the event
+   - Provides user feedback about success or failure
+
+### Configuration
+
+The following environment variables are required:
+
+- `BACKEND_API_URL`: URL of the backend API (default: "http://backend:8000/api/v1")
+- `RASA_SERVICE_API_KEY`: API key for service-to-service authentication
+- `OLLAMA_API_BASE`: URL of the Ollama LLM service
+- `OLLAMA_MODEL`: The model to use for LLM-based extraction
+
+Generate a secure random key for the service API key:
+```bash
+openssl rand -hex 32
+```
+
+### Security
+
+Communication between the Rasa action server and the backend API is secured using API key authentication. The API key is passed in the `X-Service-API-Key` header.
+
+### Testing
+
+Test conversations are defined in `rasa/tests/conversation_tests.md`. Run the tests with:
+
+```bash
+docker-compose exec rasa rasa test
+``` 

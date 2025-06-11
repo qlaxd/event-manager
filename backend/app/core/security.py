@@ -25,6 +25,9 @@ pwd_context = CryptContext(
     bcrypt__rounds=settings.PASSWORD_BCRYPT_ROUNDS,
 )
 
+# OAuth2 scheme with auto_error=False to allow optional authentication
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token", auto_error=False)
+
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token")
 
@@ -244,4 +247,46 @@ async def require_admin(current_user = Depends(get_current_user)) -> Any:
 # API Key authentication for admin endpoints
 def verify_admin_api_key(api_key: str) -> bool:
     """Verify admin API key."""
-    return secrets.compare_digest(api_key, settings.ADMIN_API_KEY) 
+    return secrets.compare_digest(api_key, settings.ADMIN_API_KEY)
+
+
+# Optional version of the get_current_user dependency for service-to-service communication
+async def get_current_active_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: AsyncSession = Depends(get_async_session)
+) -> Optional[Any]:
+    """
+    Get current user from JWT token, but don't raise an exception if no token is provided.
+    This allows endpoints to support both user authentication and service API key authentication.
+    
+    Args:
+        token: The JWT token (optional)
+        db: Database session
+        
+    Returns:
+        The user object if authenticated, None otherwise
+    """
+    if not token:
+        return None
+    
+    try:
+        payload = SecurityUtils.decode_token(token)
+        user_id: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        
+        if user_id is None or token_type != "access":
+            return None
+        
+        # Import here to avoid circular imports
+        from app.repositories.user_repository import UserRepository
+        
+        # Get user from database
+        user_repo = UserRepository(db)
+        user = await user_repo.get_by_id(user_id)
+        
+        if not user or not user.is_active:
+            return None
+            
+        return user
+    except JWTError:
+        return None 

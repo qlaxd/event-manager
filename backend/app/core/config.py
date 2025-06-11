@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     PASSWORD_RESET_EXPIRE_MINUTES: int = 60
     
+    # Rasa Service API Key for machine-to-machine communication
+    RASA_SERVICE_API_KEY: str = secrets.token_urlsafe(32)
+    
     # JWT Keys
     JWT_PRIVATE_KEY_PATH: Optional[Path] = None
     JWT_PUBLIC_KEY_PATH: Optional[Path] = None

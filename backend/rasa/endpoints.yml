@@ -52,6 +52,14 @@ llm:
           api_base: "${OLLAMA_API_BASE}"
       router:
         routing_strategy: least-busy
+    # Add the new agentic_extraction model group
+    - id: agentic_extraction
+      models:
+        - provider: ollama
+          model: llama3:8b
+          api_base: "${OLLAMA_API_BASE}"
+      router:
+        routing_strategy: least-busy
 
 # The model groups below were for a different feature (Enterprise Search)
 # and can be removed or kept if that feature is also being used.

@@ -9,17 +9,53 @@ import requests
 import logging
 import os
 import json
+from datetime import datetime, timedelta
+import dateparser
+import re
+import uuid
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import UserUtteranceReverted, BotUttered
+from rasa_sdk.events import UserUtteranceReverted, BotUttered, SlotSet
 
+# Get backend API URL from environment variable, or use default
+BACKEND_API_URL = os.getenv('BACKEND_API_URL', 'http://backend:8000/api/v1')
+RASA_SERVICE_API_KEY = os.getenv('RASA_SERVICE_API_KEY', '')
+OLLAMA_API_BASE = os.getenv('OLLAMA_API_BASE', 'http://ollama:11434')
+DEFAULT_MODEL = os.getenv('OLLAMA_MODEL', 'llama3:8b')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Get the Ollama base URL from an environment variable for flexibility,
-# defaulting to the local development setup.
-OLLAMA_API_BASE = os.getenv("OLLAMA_API_BASE", "http://ollama:11434")
-# Use our LLM model as the default model
-DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "llama3:8b")
+# Create a constant for the bot user ID
+# This should be a UUID that corresponds to a real user in the database
+# For development, you can create a dedicated "bot user" in the database
+# and use its ID here
+BOT_USER_ID = "00000000-0000-0000-0000-000000000000"  # Replace with a real user ID from your database
+
+# Helper function to parse occurrence text into ISO format
+def _parse_occurrence_text(occurrence_text: str = None) -> str:
+    """Parse occurrence text into ISO format."""
+    if not occurrence_text:
+        # Default to now + 1 day at noon
+        tomorrow_noon = datetime.now().replace(
+            hour=12, minute=0, second=0, microsecond=0
+        ) + timedelta(days=1)
+        return tomorrow_noon.isoformat()
+    
+    try:
+        # Use dateparser to handle various date formats
+        parsed_date = dateparser.parse(occurrence_text)
+        if parsed_date:
+            return parsed_date.isoformat()
+    except Exception as e:
+        logger.error(f"Error parsing occurrence text: {e}")
+    
+    # Default to tomorrow noon if parsing fails
+    tomorrow_noon = datetime.now().replace(
+        hour=12, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+    return tomorrow_noon.isoformat()
 
 class ActionLLMFallback(Action):
     def name(self) -> Text:
@@ -96,4 +132,172 @@ class ActionLLMFallback(Action):
             dispatcher.utter_message(text="I'm sorry, I don't have specific information about that. As the UCC Event Manager assistant, I can help with creating and managing events. How can I assist you with event management today?") 
             
         # Return UserUtteranceReverted to not influence further conversations
+        return [UserUtteranceReverted()] 
+    
+class ActionCreateEventFromLlm(Action):
+    """
+    Custom action that creates an event from extracted entities.
+    """
+    def name(self) -> Text:
+        return "action_create_event_from_llm"
+
+    def run(self, 
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        """
+        Execute the action to create an event using extracted entities.
+        
+        Args:
+            dispatcher: Dispatcher to send messages to the user
+            tracker: Conversation tracker
+            domain: Domain definition
+            
+        Returns:
+            List of events to influence the conversation
+        """
+        # Extract entities from the latest message
+        latest_message = tracker.latest_message
+        entities = latest_message.get('entities', [])
+        
+        # Create a dictionary to store the extracted values
+        extracted_data = {}
+        for entity in entities:
+            entity_type = entity.get('entity')
+            entity_value = entity.get('value')
+            if entity_type and entity_value:
+                extracted_data[entity_type] = entity_value
+                
+        # Get extracted entities from slots (as backup)
+        title = tracker.get_slot("event_title") or extracted_data.get("event_title")
+        description = tracker.get_slot("event_description") or extracted_data.get("event_description")
+        occurrence_text = tracker.get_slot("event_occurrence_text") or extracted_data.get("event_occurrence_text")
+        
+        # If still no title, try to extract one from the user's message
+        if not title:
+            # Try to extract a title using improved patterns
+            user_message = latest_message.get('text', '')
+            title_patterns = [
+                # Match "create an event for [TITLE]" pattern
+                r'(?:create|create an event for|make|add|schedule|létrehoz(?:ni)?)\s+(?:an?|egy)?\s*(?:event(?:et)?|esemény(?:t)?)?(?:\s+for)?\s+([\w\s]+?)(?:\s+(?:on|at|tomorrow|next|jövő|holnap)|$)',
+                
+                # Match "[TITLE] event" pattern 
+                r'(?:a|an|egy)?\s*([\w\s]+?)\s+(?:event(?:et)?|esemény(?:t)?)\s+(?:on|at|tomorrow|next|jövő|holnap)',
+                
+                # Match simple "dinner with X" pattern that's likely an event title
+                r'\b((?:dinner|lunch|breakfast|meeting|appointment|date|coffee|drinks|party|concert|movie|show)\s+(?:with|for|at|in)\s+[\w\s]+)\b',
+                
+                # Fallback to the original patterns
+                r'(?:event(?:et)?|esemény(?:t)?)\s+(?:a|az|egy)?\s*([\w\s]+?)(?:\s*,|\s*hogy|\s*\.|$)',
+                r'(?:létrehoz(?:ni)?)\s+(?:egy)?\s*(?:event(?:et)?|esemény(?:t)?)\s+(?:a|az)?\s*([\w\s]+?)(?:\s*,|\s*hogy|\s*\.|$)'
+            ]
+            
+            for pattern in title_patterns:
+                match = re.search(pattern, user_message, re.IGNORECASE)
+                if match and match.group(1):
+                    title = match.group(1).strip()
+                    break
+            
+            # If still no title and the message contains "dinner", "lunch", etc. just use that as the title
+            if not title:
+                event_keywords = ["dinner", "lunch", "breakfast", "meeting", "appointment", "date", "coffee", "drinks", "party", "concert", "movie", "show"]
+                for keyword in event_keywords:
+                    if keyword in user_message.lower():
+                        # Extract the keyword and a few words around it
+                        keyword_pattern = r'\b(' + keyword + r'(?:\s+\w+){0,3})\b'
+                        match = re.search(keyword_pattern, user_message, re.IGNORECASE)
+                        if match:
+                            title = match.group(1).strip()
+                            break
+                    
+        # Log the extracted entities
+        logger.info(f"Extracted entities for event creation: title='{title}', description='{description}', occurrence='{occurrence_text}'")
+        
+        # If no title was extracted, ask for clarification
+        if not title:
+            dispatcher.utter_message(response="utter_ask_event_title")
+            return []
+        
+        # Parse the occurrence text into ISO format
+        occurrence_iso = _parse_occurrence_text(occurrence_text)
+        
+        # Create the event using either the admin API key or a system user account
+        # First, try to create an event via the admin API
+        try:
+            # Admin API approach - we need to use a service API key with admin privileges
+            admin_payload = {
+                "title": title,
+                "description": description or f"Esemény létrehozva a chatbot által ekkor: {datetime.now().isoformat()}",
+                "occurrence": occurrence_iso,
+                "user_id": tracker.sender_id  # Use the requesting user's ID instead of BOT_USER_ID
+            }
+            
+            admin_headers = {
+                "Content-Type": "application/json",
+                "X-Service-API-Key": RASA_SERVICE_API_KEY
+            }
+            
+            logger.info(f"Making admin API request to create event for user {tracker.sender_id}")
+            
+            # Make the API call
+            response = requests.post(
+                f"{BACKEND_API_URL}/events/", 
+                json=admin_payload, 
+                headers=admin_headers,
+                timeout=10
+            )
+            
+            # Log the response for debugging
+            logger.info(f"API response status: {response.status_code}")
+            logger.info(f"API response content: {response.text[:500]}")
+            
+            response.raise_for_status()
+            
+            # Log the successful event creation
+            logger.info(f"Event created via agent for user {tracker.sender_id} with title '{title}'")
+            
+            # Return a success message to the user
+            dispatcher.utter_message(response="utter_event_created_by_agent", event_title=title)
+            
+            # Clear the slots after successful event creation
+            return [
+                SlotSet("event_title", None),
+                SlotSet("event_description", None),
+                SlotSet("event_occurrence_text", None)
+            ]
+            
+        except requests.exceptions.RequestException as e:
+            # Log the error details
+            logger.error(f"Agentic event creation API call failed for user {tracker.sender_id}: {e}")
+            
+            # Add more detailed error information if available
+            if hasattr(e, 'response') and e.response:
+                logger.error(f"Response status code: {e.response.status_code}")
+                logger.error(f"Response content: {e.response.text[:500]}")
+                
+                # Check if we need to create a system user first
+                if e.response.status_code == 409 and 'database_error' in e.response.text:
+                    logger.error("Foreign key constraint violation - need to create system user first")
+                    # You can add logic here to create a system user if needed
+                
+            # Return a failure message to the user
+            dispatcher.utter_message(response="utter_event_creation_failed")
+            
+            # Don't clear slots on error to allow retrying
+            return []
+    
+class ActionCreateEvent(Action):
+    def name(self) -> Text:
+        return "action_create_event"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        dispatcher.utter_message(text="I'm sorry, I don't have specific information about that. As the UCC Event Manager assistant, I can help with creating and managing events. How can I assist you with event management today?") 
+        return [UserUtteranceReverted()] 
+    
+class ActionGetEvent(Action):
+    def name(self) -> Text:
+        return "action_get_event"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        dispatcher.utter_message(text="I'm sorry, I don't have specific information about that. As the UCC Event Manager assistant, I can help with creating and managing events. How can I assist you with event management today?") 
         return [UserUtteranceReverted()] 

@@ -25,20 +25,35 @@ class EventService:
         self.repository = EventRepository(db_session)
 
     async def create_event(
-        self, *, event_data: EventCreate, current_user: User
+        self, *, event_data: EventCreate, current_user: User = None, user_id: UUID = None
     ) -> Event:
         """
-        Creates a new event for the current user.
+        Creates a new event.
 
         :param event_data: Data for the new event.
-        :param current_user: The user creating the event.
+        :param current_user: The user creating the event (optional).
+        :param user_id: The ID of the user to create the event for (optional).
         :return: The newly created event.
+        :raises ValueError: If neither current_user nor user_id is provided.
         """
+        # Determine the user_id to use
+        if user_id is None and current_user is not None:
+            user_id = current_user.id
+        elif user_id is None and event_data.user_id is not None:
+            user_id = event_data.user_id
+            
+        if user_id is None:
+            raise ValueError("Either current_user, user_id parameter, or user_id in event_data must be provided")
+        
         # Business logic can be added here in the future, e.g., checking
         # for overlapping events or enforcing limits.
         
+        # Create a copy of event_data without user_id to avoid duplicate parameter issues
+        event_data_dict = event_data.model_dump(exclude={"user_id"})
+        event_data_clean = EventCreate(**event_data_dict)
+        
         new_event = await self.repository.create(
-            event_data=event_data, user_id=current_user.id
+            event_data=event_data_clean, user_id=user_id
         )
 
         # Other services (e.g., notifications) could be called here.

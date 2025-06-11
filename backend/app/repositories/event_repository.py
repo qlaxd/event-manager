@@ -30,10 +30,15 @@ class EventRepository:
         :param user_id: The ID of the user creating the event.
         :return: The newly created Event object.
         """
+        # Convert the event_data to a dictionary, excluding user_id to prevent duplication
+        event_dict = event_data.model_dump(exclude={"user_id"})
+        
+        # Create the new event object with the cleaned event data
         new_event = Event(
-            **event_data.model_dump(),
+            **event_dict,
             user_id=user_id,
         )
+        
         self.db.add(new_event)
         await self.db.commit()
         await self.db.refresh(new_event)

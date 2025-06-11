@@ -9,4 +9,9 @@ rules:
   - rule: Direct affirm to LLM
     steps:
     - intent: affirm
-    - action: action_llm_fallback 
+    - action: action_llm_fallback
+    
+  - rule: Activate agentic event creation
+    steps:
+    - intent: create_event_unstructured
+    - action: action_create_event_from_llm 

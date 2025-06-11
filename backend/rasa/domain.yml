@@ -11,6 +11,32 @@ intents:
   - ask_help
   - ask_iamabot
   - nlu_fallback
+  - create_event_unstructured
+
+entities:
+  - event_title
+  - event_description
+  - event_occurrence_text
+
+slots:
+  event_title:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: event_title
+  event_description:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: event_description
+  event_occurrence_text:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: event_occurrence_text
 
 responses:
   utter_greet:
@@ -29,9 +55,16 @@ responses:
     - text: "To delete an event, find it in your list and click the delete icon. You will be asked to confirm before the event is permanently removed."
   utter_please_wait:
     - text: "One moment while I check on that for you..."
+  utter_event_created_by_agent:
+    - text: "Rendben, létrehoztam az eseményt '{event_title}' néven."
+  utter_event_creation_failed:
+    - text: "Sajnos hiba történt az esemény létrehozása közben. Kérlek, próbáld újra később."
+  utter_ask_event_title:
+    - text: "Milyen néven hozzam létre az eseményt?"
 
 actions:
   - action_llm_fallback
+  - action_create_event_from_llm
 
 session_config:
   session_expiration_time: 60

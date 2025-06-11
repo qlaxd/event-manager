@@ -23,7 +23,7 @@ class EventBase(BaseModel):
 
 class EventCreate(EventBase):
     """Schema for creating an event."""
-    pass
+    user_id: uuid.UUID | None = None  # Optional field for service-to-service calls
 
 
 class EventUpdate(BaseModel):
