@@ -55,6 +55,11 @@ COPY app app
 COPY alembic alembic
 COPY alembic.ini alembic.ini
 COPY keys keys
+COPY scripts scripts
+COPY backend_entrypoint.sh backend_entrypoint.sh
+
+# Make entrypoint script executable
+RUN chmod +x /app/backend_entrypoint.sh
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
@@ -69,5 +74,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8000/health')"
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Set entrypoint
+ENTRYPOINT ["/app/backend_entrypoint.sh"] 

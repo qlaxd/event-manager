@@ -35,4 +35,9 @@ stories:
   - intent: greet
   - action: utter_greet
   - intent: goodbye
-  - action: utter_goodbye 
+  - action: utter_goodbye
+
+- story: create event from unstructured input
+  steps:
+  - intent: create_event_unstructured
+  - action: action_create_event_from_llm 

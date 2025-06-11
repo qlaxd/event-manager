@@ -26,23 +26,6 @@ pipeline:
 - name: FallbackClassifier
   threshold: 0.6
   ambiguity_threshold: 0.1
-#  Extract entities using an LLM
-- name: rasa.nlu.llm.LLMEntityExtractor
-  llm:
-    model_group: agentic_extraction
-  entity_examples:
-    - entity: event_title
-      examples:
-        - "Dinner with Anna"
-        - "Team meeting"
-    - entity: event_description
-      examples:
-        - "Need to discuss project updates"
-        - "Catching up with an old friend"
-    - entity: event_occurrence_text
-      examples:
-        - "tomorrow tuesday"
-        - "next friday at 3pm"
 
 # Configuration for the policies.
 # https://rasa.com/docs/rasa/policies/

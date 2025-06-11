@@ -137,6 +137,7 @@ class ActionLLMFallback(Action):
 class ActionCreateEventFromLlm(Action):
     """
     Custom action that creates an event from extracted entities.
+    This action prioritizes LLM-extracted entities and only uses regex as a fallback.
     """
     def name(self) -> Text:
         return "action_create_event_from_llm"
@@ -175,13 +176,70 @@ class ActionCreateEventFromLlm(Action):
         title = tracker.get_slot("event_title") or extracted_data.get("event_title")
         description = tracker.get_slot("event_description") or extracted_data.get("event_description")
         occurrence_text = tracker.get_slot("event_occurrence_text") or extracted_data.get("event_occurrence_text")
-        
-        # If no title was extracted by the LLM, try to extract it from the user message
+
+        # Get the user message
         user_message = latest_message.get('text', '')
+
+        # If entities are empty, try one more direct approach with the LLM
+        if not entities and (not title or not description or not occurrence_text):
+            logger.info("No entities extracted by pipeline. Attempting direct LLM entity extraction.")
+            try:
+                # Make a direct request to the Ollama LLM
+                llm_prompt = f"""
+                Extract the following entities from this text: "{user_message}"
+                
+                - event_title: The title/name of the event
+                - event_description: Any description or details about the event
+                - event_occurrence_text: When the event occurs (date and/or time)
+                
+                Format your response as JSON with these three fields.
+                """
+                
+                llm_payload = {
+                    "model": DEFAULT_MODEL,
+                    "prompt": llm_prompt,
+                    "stream": False
+                }
+                
+                # Try to connect to the Ollama API directly
+                response = requests.post(
+                    f"{OLLAMA_API_BASE}/api/generate",
+                    json=llm_payload,
+                    timeout=10
+                )
+                response.raise_for_status()
+                response_data = response.json()
+                llm_response = response_data.get("response", "")
+                
+                # Try to extract JSON from the response
+                import json
+                import re
+                
+                # Look for JSON in the response
+                json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
+                if json_match:
+                    try:
+                        json_data = json.loads(json_match.group(0))
+                        logger.info(f"Direct LLM entity extraction result: {json_data}")
+                        
+                        # Update entities if found
+                        if not title and json_data.get('event_title'):
+                            title = json_data.get('event_title')
+                        if not description and json_data.get('event_description'):
+                            description = json_data.get('event_description')
+                        if not occurrence_text and json_data.get('event_occurrence_text'):
+                            occurrence_text = json_data.get('event_occurrence_text')
+                    except json.JSONDecodeError:
+                        logger.warning(f"Could not parse JSON from LLM response: {llm_response}")
+            except Exception as e:
+                logger.error(f"Error during direct LLM entity extraction: {e}")
+        
+        # FALLBACK: Only if the LLM extraction failed, use regex patterns
         if not title:
+            logger.info("Falling back to regex patterns for title extraction")
             # Clean up common prefixes that shouldn't be part of the title
             title_patterns = [
-                # Match "create an event titled [TITLE]" pattern - better pattern with word boundary
+                # Match "create an event titled [TITLE]" pattern
                 r'(?:create|make|add|schedule)(?:\s+an?)?(?:\s+event)?(?:\s+titled)\s+([\w\s]+?)(?:\s+(?:for|on|at|tomorrow|next)|$)',
                 
                 # Match "create an event for [TITLE]" pattern
@@ -201,8 +259,9 @@ class ActionCreateEventFromLlm(Action):
                     title = match.group(1).strip()
                     break
         
-        # If no description was extracted by the LLM, try to extract it from the user message
+        # FALLBACK: Extract description using regex if LLM failed
         if not description and "description" in user_message.lower():
+            logger.info("Falling back to regex patterns for description extraction")
             description_patterns = [
                 r'description(?:\s+(?:that|which))?\s+(?:says|tells|is)?\s+([\w\s,.]+?)(?:$|\.|\n)',
                 r'with\s+(?:a|the)?\s+description(?:\s+(?:that|which))?\s+([\w\s,.]+?)(?:$|\.|\n)'
@@ -214,8 +273,9 @@ class ActionCreateEventFromLlm(Action):
                     description = match.group(1).strip()
                     break
         
-        # If no occurrence text was extracted by the LLM, try to extract it from the user message
+        # FALLBACK: Extract occurrence using regex if LLM failed
         if not occurrence_text:
+            logger.info("Falling back to regex patterns for occurrence extraction")
             time_patterns = [
                 r'(?:on|at|for)\s+(tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?\w+|\w+\s+\d{1,2}(?:st|nd|rd|th)?)\s+(?:at\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)',
                 r'(tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?\w+|\w+\s+\d{1,2}(?:st|nd|rd|th)?)\s+(?:at\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)',
@@ -245,7 +305,7 @@ class ActionCreateEventFromLlm(Action):
                     title = title[:-len(suffix)].strip()
         
         # Log the extracted entities
-        logger.info(f"Extracted entities for event creation: title='{title}', description='{description}', occurrence='{occurrence_text}'")
+        logger.info(f"Final extracted entities for event creation: title='{title}', description='{description}', occurrence='{occurrence_text}'")
         
         # If no title was extracted, ask for clarification
         if not title:

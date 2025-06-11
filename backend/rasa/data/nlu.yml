@@ -63,37 +63,54 @@ nlu:
 
 - intent: ask_help
   examples: |
-    - help
-    - what can you do?
+    - What can you do?
+    - Help
     - I need assistance
-    - can you help me?
+    - How does this work?
+    - What are your features?
+    - How can you help me?
+    - Tell me what you can do
+    - segítség
+    - miben tudsz segíteni?
 
 - intent: ask_iamabot
   examples: |
     - Are you a bot?
     - Are you a human?
-    - What are you?
+    - Am I talking to a bot?
+    - Am I talking to a human?
     - Who are you?
+    - Mi vagy te?
+    - Te egy robot vagy?
 
+# This intent is for capturing unstructured event creation requests
 - intent: create_event_unstructured
   examples: |
-    - csinálj egy eventet a hétvégi grillezésnek
-    - hozz létre egy új eseményt a jövő heti vizsgára
-    - create an event for me for tomorrow
-    - create an event for dinner with Anna
-    - new event: lunch meeting tomorrow
-    - set up an event for my dentist appointment
-    - add a new event for the team meeting
-    - I need an event for the conference next week
-    - please create an event for tomorrow named "meeting with John"
-    - i'm going to a party tomorrow
-    - I'm having dinner with my friends tomorrow
-    - I'm having dinner with Emily tomorrow, create an event for this
-    - Create an event for my meeting with John
-    - Make a new event for tomorrow's lunch
-    - Add an event for my doctor appointment next week
-    - Schedule a dinner with friends for Saturday
-
+    - Can you create an event for dinner with Emily tomorrow at 7pm?
+    - I need to schedule a team meeting for next Friday at 10am
+    - Add an event for my doctor appointment on Tuesday
+    - Create an event titled Project Kickoff next Monday at 2pm
+    - I need to create a meeting with the client tomorrow morning
+    - Schedule lunch with John on Wednesday at noon
+    - Create an event for my birthday party next Saturday at 8pm
+    - I have a dentist appointment next Thursday at 9am
+    - Can you add a coffee meeting with Anna tomorrow at 3pm?
+    - Schedule a call with vendors on Friday at 11am
+    - Create a movie night event for Saturday at 7pm
+    - Add a gym session for tomorrow at 6am
+    - I need to remember my interview on Monday at 10am
+    - Schedule a team building event for next Friday at 4pm
+    - Add a dinner reservation for tomorrow at 8pm
+    - I have a presentation next Tuesday at 3pm
+    - Create an event for shopping this weekend
+    - Add a reminder for my flight on Sunday at 2pm
+    - Schedule a phone call with mom tomorrow at 6pm
+    - Add an event for my annual review next Thursday at 11am
+    - létrehoznál egy eseményt holnap délután 4 órára?
+    - eseményt szeretnék létrehozni a megbeszéléshez jövő héten
+    - add hozzá a naptárhoz a pénteki ebédet Jánossal
+    - készíts egy eseményt a holnapi orvosi időpontra
+    - létrehoznál egy eseményt a projektzáró találkozóra jövő hétfőn 10 órakor?
 
 - intent: nlu_fallback
   examples: |
