@@ -36,25 +36,6 @@ async def send_chat_message(
     response = await HelpdeskService.talk_to_bot(user_id=str(current_user.id), request=chat_request)
     return response
 
-# TODO: Implement this endpoint to be able to get a pending response by its ID
-@router.get("/responses/{response_id}", response_model=ChatMessageResponse)
-async def get_pending_response(
-    response_id: str,
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Retrieve a pending response by its ID.
-    """
-    response = await HelpdeskService.get_pending_response(response_id)
-    
-    if not response:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Response not found"
-        )
-    
-    return response
-
 # TODO: Implement escalation and chat history endpoints
 
 # TODO: Implement helpdesk endpoints

@@ -22,8 +22,7 @@ class HelpdeskService:
         """
         Sends a message to the Rasa server and gets a response.
         
-        If the message requires LLM processing, it will return an immediate 
-        response with processing=True and store the response_id for polling.
+        Waits for the complete response from the LLM, with a reasonable timeout.
         """
         if not settings.RASA_URL:
             logger.error("RASA_URL is not configured. Cannot connect to chatbot.")
@@ -40,31 +39,23 @@ class HelpdeskService:
         rasa_webhook_url = f"{settings.RASA_URL}/webhooks/rest/webhook"
 
         try:
-            # Increased timeout to 30 seconds to allow for immediate responses
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            # Increased timeout to 60 seconds to allow for LLM processing
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(rasa_webhook_url, json=rasa_payload)
                 response.raise_for_status()
                 rasa_responses = response.json()
         except httpx.TimeoutException:
-            # If we hit a timeout, assume it's an LLM request being processed
-            response_id = str(uuid.uuid4())
-            logger.info(
-                "Request timed out, likely an LLM-based response being processed",
+            logger.error(
+                "Request timed out after 60 seconds waiting for LLM response",
                 user_id=user_id,
-                response_id=response_id
+                message=request.message
             )
             
-            # Create and store a pending response
-            pending_response = ChatMessageResponse(
-                response="I'm processing your request. This might take a moment...",
+            # Return a timeout message
+            return ChatMessageResponse(
+                response="I'm sorry, but it's taking longer than expected to process your request. Please try again later.",
                 session_id=request.session_id or user_id,
-                processing=True,
-                response_id=response_id
             )
-            pending_responses[response_id] = pending_response
-            
-            # Return the pending response to the client
-            return pending_response
             
         except httpx.RequestError as e:
             logger.error(

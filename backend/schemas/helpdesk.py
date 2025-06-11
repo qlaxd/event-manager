@@ -15,8 +15,6 @@ class ChatMessageResponse(BaseModel):
     confidence: Optional[float] = None
     escalation_suggested: bool = False
     quick_replies: Optional[List[str]] = None
-    processing: bool = False
-    response_id: Optional[str] = None
 
 class EscalationRequest(BaseModel):
     """Schema for escalating a chat to a human agent."""
