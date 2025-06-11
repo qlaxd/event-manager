@@ -1,0 +1,257 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # or master, depending on your default branch name
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+jobs:
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --no-interaction
+
+      - name: Run linting
+        working-directory: ./backend
+        run: |
+          poetry run flake8 app tests
+          poetry run isort --check-only --profile black app tests
+          poetry run black --check app tests
+
+      - name: Run unit tests
+        working-directory: ./backend
+        run: |
+          poetry run pytest tests/unit
+
+      - name: Run security checks
+        working-directory: ./backend
+        run: |
+          poetry run bandit -r app
+          poetry run safety check
+
+  build:
+    name: Build Docker Images
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: ucc-event-manager/backend:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/backend-image.tar
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          push: false
+          tags: ucc-event-manager/frontend:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/frontend-image.tar
+
+      - name: Build action-server image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend/rasa/actions
+          file: ./backend/rasa/actions/Dockerfile
+          push: false
+          tags: ucc-event-manager/action-server:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/action-server-image.tar
+
+      - name: Save Docker images
+        run: |
+          mkdir -p /tmp/docker-images
+          cp /tmp/backend-image.tar /tmp/docker-images/
+          cp /tmp/frontend-image.tar /tmp/docker-images/
+          cp /tmp/action-server-image.tar /tmp/docker-images/
+
+      - name: Upload Docker images as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-images
+          path: /tmp/docker-images
+
+      # Update cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  deploy:
+    name: Deploy to Production Server
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download Docker images
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-images
+          path: /tmp/docker-images
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          if_key_exists: replace
+
+      - name: Transfer deployment files to server
+        run: |
+          # Create deployment package
+          mkdir -p deployment
+          cp docker-compose.prod.yml deployment/
+          cp -r nginx deployment/
+          cp deploy.sh deployment/
+          cp prod.env.example deployment/
+          
+          # Transfer to server
+          scp -r deployment ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/ucc-deployment
+
+      - name: Transfer Docker images to server
+        run: |
+          # Transfer Docker images to server
+          scp /tmp/docker-images/*.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/ucc-deployment/
+
+      - name: Load environment variables
+        run: |
+          echo "Creating .env file on server"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cat > ~/ucc-deployment/.env << 'EOL'
+          # Core Settings
+          ENVIRONMENT=production
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          ADMIN_API_KEY=${{ secrets.ADMIN_API_KEY }}
+          DEBUG=false
+
+          # JWT Authentication
+          ALGORITHM=RS256
+          
+          # Database
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=ucc_event_manager_prod
+          DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/ucc_event_manager_prod
+          
+          # Redis
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_URL=redis://:${{ secrets.REDIS_PASSWORD }}@redis:6379/0
+          
+          # Frontend
+          FRONTEND_API_URL=${{ secrets.FRONTEND_API_URL }}
+          
+          # Other environment variables
+          SMTP_SERVER=${{ secrets.SMTP_SERVER }}
+          SMTP_PORT=${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
+          
+          # Security Settings
+          ACCESS_TOKEN_EXPIRE_MINUTES=60
+          REFRESH_TOKEN_EXPIRE_DAYS=30
+          PASSWORD_BCRYPT_ROUNDS=12
+          PASSWORD_MIN_LENGTH=8
+          PASSWORD_REQUIRE_UPPERCASE=true
+          PASSWORD_REQUIRE_LOWERCASE=true
+          PASSWORD_REQUIRE_NUMBERS=true
+          MFA_ISSUER_NAME=UCC_Event_Manager
+          MFA_TIME_WINDOW=1
+          MFA_BACKUP_CODES_COUNT=8
+          EOL"
+
+      - name: Create JWT keys on server
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            mkdir -p ~/ucc-deployment/keys
+            
+            # Create private key file
+            echo '${{ secrets.JWT_PRIVATE_KEY }}' > ~/ucc-deployment/keys/jwt-private.pem
+            
+            # Create public key file
+            echo '${{ secrets.JWT_PUBLIC_KEY }}' > ~/ucc-deployment/keys/jwt-public.pem
+          "
+
+      - name: Deploy application
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ~/ucc-deployment
+            
+            # Make deploy script executable
+            chmod +x deploy.sh
+            
+            # Load Docker images
+            docker load < backend-image.tar
+            docker load < frontend-image.tar
+            docker load < action-server-image.tar
+            
+            # Tag images with appropriate names
+            docker tag ucc-event-manager/backend:${{ github.sha }} ucc-event-manager/backend:latest
+            docker tag ucc-event-manager/frontend:${{ github.sha }} ucc-event-manager/frontend:latest
+            docker tag ucc-event-manager/action-server:${{ github.sha }} ucc-event-manager/action-server:latest
+            
+            # Update docker-compose.prod.yml to use local images
+            sed -i 's|build:|image: ucc-event-manager/backend:latest\\n    #build:|' docker-compose.prod.yml
+            sed -i 's|context: ./frontend|image: ucc-event-manager/frontend:latest\\n      #context: ./frontend|' docker-compose.prod.yml
+            sed -i 's|context: ./backend/rasa/actions|image: ucc-event-manager/action-server:latest\\n      #context: ./backend/rasa/actions|' docker-compose.prod.yml
+            
+            # Deploy the application
+            ./deploy.sh deploy
+          "
+
+      - name: Verify deployment
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ~/ucc-deployment
+            docker-compose -f docker-compose.prod.yml ps
+            echo 'Checking backend health...'
+            curl -k https://localhost/api/v1/health || echo 'Health check not available yet'
+          "
+
+      - name: Cleanup
+        if: always()
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            rm -f ~/ucc-deployment/*.tar
+          " 
