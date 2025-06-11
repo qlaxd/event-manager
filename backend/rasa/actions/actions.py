@@ -44,17 +44,75 @@ def _parse_occurrence_text(occurrence_text: str = None) -> str:
         return tomorrow_noon.isoformat()
     
     try:
-        # Use dateparser to handle various date formats
-        parsed_date = dateparser.parse(occurrence_text)
+        # Use dateparser to handle various date formats with explicit settings
+        # Add settings to properly handle relative dates
+        parsed_date = dateparser.parse(
+            occurrence_text,
+            settings={
+                'RELATIVE_BASE': datetime.now(),
+                'PREFER_DATES_FROM': 'future',
+                'DATE_ORDER': 'DMY',
+                'RETURN_AS_TIMEZONE_AWARE': False,
+                'PREFER_DAY_OF_MONTH': 'current'
+            }
+        )
+        
         if parsed_date:
+            logger.info(f"Successfully parsed occurrence text '{occurrence_text}' to {parsed_date.isoformat()}")
             return parsed_date.isoformat()
+        else:
+            logger.error(f"Dateparser returned None for occurrence text: '{occurrence_text}'")
     except Exception as e:
-        logger.error(f"Error parsing occurrence text: {e}")
+        logger.error(f"Error parsing occurrence text '{occurrence_text}': {e}")
     
-    # Default to tomorrow noon if parsing fails
+    # Fallback: Try explicit handling for common patterns
+    try:
+        # Handle "next Monday at 10AM" pattern explicitly
+        day_match = re.search(r'next\s+(\w+)', occurrence_text, re.IGNORECASE)
+        time_match = re.search(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)?', occurrence_text, re.IGNORECASE)
+        
+        if day_match and time_match:
+            day_name = day_match.group(1).lower()
+            hour = int(time_match.group(1))
+            minute = int(time_match.group(2) or 0)
+            am_pm = time_match.group(3).lower() if time_match.group(3) else None
+            
+            # Adjust hour for PM
+            if am_pm == 'pm' and hour < 12:
+                hour += 12
+            elif am_pm == 'am' and hour == 12:
+                hour = 0
+                
+            # Map day names to weekday numbers (0 = Monday in our mapping)
+            day_mapping = {
+                'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3,
+                'friday': 4, 'saturday': 5, 'sunday': 6
+            }
+            
+            if day_name in day_mapping:
+                # Get today's weekday (0 = Monday in our mapping)
+                today_weekday = datetime.now().weekday()
+                target_weekday = day_mapping[day_name]
+                
+                # Calculate days until next target weekday
+                days_ahead = target_weekday - today_weekday
+                if days_ahead <= 0:  # Target day already happened this week
+                    days_ahead += 7
+                
+                # Calculate the target date
+                target_date = datetime.now() + timedelta(days=days_ahead)
+                target_date = target_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                
+                logger.info(f"Manually parsed '{occurrence_text}' to {target_date.isoformat()}")
+                return target_date.isoformat()
+    except Exception as e:
+        logger.error(f"Error in fallback date parsing for '{occurrence_text}': {e}")
+    
+    # Default to tomorrow noon if all parsing fails
     tomorrow_noon = datetime.now().replace(
         hour=12, minute=0, second=0, microsecond=0
     ) + timedelta(days=1)
+    logger.warning(f"Falling back to default time for '{occurrence_text}': {tomorrow_noon.isoformat()}")
     return tomorrow_noon.isoformat()
 
 class ActionLLMFallback(Action):
