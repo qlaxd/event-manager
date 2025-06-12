@@ -16,17 +16,17 @@ class AuthService {
     params.append('grant_type', 'password');
     params.append('username', credentials.email);
     params.append('password', credentials.password);
-    
+
     if (credentials.mfa_code) {
       params.append('mfa_code', credentials.mfa_code);
     }
-    
+
     const response = await apiClient.post<TokenResponse>('/auth/token', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
-    
+
     return response.data;
   }
 
@@ -82,6 +82,12 @@ class AuthService {
     });
     return response.data;
   }
+
+  async refresh(): Promise<TokenResponse> {
+    // Send empty body; backend will read refresh token from HttpOnly cookie
+    const response = await apiClient.post<TokenResponse>('/auth/refresh', {});
+    return response.data;
+  }
 }
 
-export default new AuthService(); 
+export default new AuthService();

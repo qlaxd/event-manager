@@ -81,14 +81,23 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // If not authenticated, try silent refresh before redirecting to login
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    authStore.setReturnUrl(to.fullPath)
-    next({ name: 'login' })
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'dashboard' })
-  } else {
-    next()
+    try {
+      await authStore.trySilentRefresh()
+    } catch {}
+    // After silent refresh, check again
+    if (!authStore.isAuthenticated) {
+      authStore.setReturnUrl(to.fullPath)
+      return next({ name: 'login' })
+    }
   }
+
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return next({ name: 'dashboard' })
+  }
+
+  next()
 })
 
 export default router

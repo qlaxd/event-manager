@@ -8,17 +8,23 @@ import apiClient from '@/services/api'
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<User | null>(null)
-  const accessToken = ref<string | null>(null)
+  const accessToken = ref<string | null>(localStorage.getItem('access_token'))
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
   const returnUrl = ref<string | null>(null)
+
+  // On store init, set Authorization header if token exists
+  if (accessToken.value) {
+    apiClient.defaults.headers.common.Authorization = `Bearer ${accessToken.value}`
+  }
 
   // Actions
   async function login(credentials: LoginRequest) {
     try {
       const response = await authService.login(credentials)
       accessToken.value = response.access_token
+      localStorage.setItem('access_token', response.access_token)
       apiClient.defaults.headers.common.Authorization = `Bearer ${response.access_token}`
-      
+
       await fetchUser()
 
       router.push(returnUrl.value || '/dashboard')
@@ -57,8 +63,9 @@ export const useAuthStore = defineStore('auth', () => {
       // Always clear client-side session data
       user.value = null
       accessToken.value = null
+      localStorage.removeItem('access_token')
       delete apiClient.defaults.headers.common.Authorization
-      
+
       // Redirect to login page
       if (router.currentRoute.value.name !== 'login') {
         router.push('/login')
@@ -66,15 +73,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function trySilentRefresh() {
+    if (accessToken.value) return
+    try {
+      // Send empty body; backend will read refresh token from HttpOnly cookie
+      const response = await apiClient.post('/auth/refresh', {})
+      const { access_token } = response.data
+      setAccessToken(access_token)
+      await fetchUser()
+    } catch (error: any) {
+      // Only logout if error is 401/403 (real auth error), not just validation error
+      const status = error?.response?.status
+      if (status === 401 || status === 403) {
+        await logout()
+      }
+      // Otherwise, do not force logout (e.g. validation error)
+    }
+  }
+
   function setReturnUrl(url: string) {
     returnUrl.value = url
   }
-  
+
   function setAccessToken(token: string) {
     accessToken.value = token
     if (token) {
+      localStorage.setItem('access_token', token)
       apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
     } else {
+      localStorage.removeItem('access_token')
       delete apiClient.defaults.headers.common.Authorization
     }
   }
@@ -89,5 +116,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     setReturnUrl,
     setAccessToken,
+    trySilentRefresh, // export the new method
   }
-}) 
+})
