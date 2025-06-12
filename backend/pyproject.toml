@@ -30,6 +30,7 @@ python-dotenv = "^1.1.0"
 qrcode = {extras = ["pil"], version = "8.2"}
 faker = "^26.1.0"
 factory-boy = "^3.3.0"
+openai = "^1.86.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.0"

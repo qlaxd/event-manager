@@ -1,13 +1,14 @@
 """Service layer for helpdesk and chatbot integration."""
 import httpx
 import structlog
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from typing import Optional, Dict
 import uuid
 import asyncio
 
 from app.core.config import settings
 from schemas.helpdesk import ChatMessageRequest, ChatMessageResponse
+from app.clients.openai_client import OpenAIClient
 
 logger = structlog.get_logger(__name__)
 
@@ -16,6 +17,46 @@ pending_responses: Dict[str, ChatMessageResponse] = {}
 
 class HelpdeskService:
     """Handles communication with the Rasa chatbot service."""
+
+    @staticmethod
+    async def transcribe_audio_input(file: UploadFile) -> str:
+        """
+        Transcribes an audio file using the OpenAI client.
+
+        Args:
+            file: The audio file to transcribe.
+
+        Returns:
+            The transcribed text.
+        
+        Raises:
+            HTTPException: If the file is not an audio file or if transcription fails.
+        """
+        if not file.content_type or not file.content_type.startswith("audio/"):
+            logger.warning("Invalid file type for transcription.", content_type=file.content_type)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file type. Please upload an audio file.",
+            )
+
+        try:
+            openai_client = OpenAIClient()
+            transcribed_text = await openai_client.transcribe_audio(file)
+            logger.info("Successfully transcribed audio.", user_id="TBD") # TODO: Pass user context if needed
+            return transcribed_text
+        except ValueError as e:
+            # This catches the API key not being set
+            logger.error(f"Configuration error for OpenAI client: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The transcription service is not configured correctly."
+            )
+        except Exception as e:
+            logger.error(f"Transcription service failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not process the audio file.",
+            )
 
     @staticmethod
     async def talk_to_bot(user_id: str, request: ChatMessageRequest) -> ChatMessageResponse:

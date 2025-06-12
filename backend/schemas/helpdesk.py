@@ -26,4 +26,8 @@ class EscalationResponse(BaseModel):
     """Schema for the response after an escalation request."""
     ticket_id: str
     message: str
-    estimated_wait_time: Optional[str] = None 
+    estimated_wait_time: Optional[str] = None
+
+class TranscriptionResponse(BaseModel):
+    """Schema for the response of an audio transcription."""
+    text: str 

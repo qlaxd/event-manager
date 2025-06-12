@@ -121,6 +121,9 @@ class Settings(BaseSettings):
     RASA_URL: Optional[str] = None
     RASA_TOKEN: Optional[str] = None
     
+    # OpenAI Settings
+    OPENAI_API_KEY: Optional[str] = None
+    
     # Twilio Settings (for voice helpdesk)
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
