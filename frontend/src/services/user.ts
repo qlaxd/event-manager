@@ -18,7 +18,7 @@ interface ProfileUpdateResponse {
 
 class UserService {
   async updateProfile(data: UpdateProfileRequest): Promise<ProfileUpdateResponse> {
-    const response = await apiClient.put<ProfileUpdateResponse>('/users/me', data)
+    const response = await apiClient.patch<ProfileUpdateResponse>('/users/me', data)
     return response.data
   }
 
@@ -28,4 +28,4 @@ class UserService {
   }
 }
 
-export default new UserService() 
+export default new UserService()

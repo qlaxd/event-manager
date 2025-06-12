@@ -36,9 +36,9 @@ export function useAudioRecorder() {
       if (!mediaRecorder.value || !isRecording.value) {
         return reject('Not recording.')
       }
-      
+
       mediaRecorder.value.onstop = () => {
-        const audioBlob = new Blob(audioChunks.value, { type: 'audio/webm' }) // whisper supports webm
+        const audioBlob = new Blob(audioChunks.value, { type: 'audio/webm' })
         audioChunks.value = []
         isRecording.value = false
         if (mediaRecorder.value) {
@@ -56,4 +56,4 @@ export function useAudioRecorder() {
     startRecording,
     stopRecording,
   }
-} 
+}
