@@ -5,7 +5,7 @@
       <div class="text-center">
         <div class="mx-auto h-12 w-12 bg-gray-600 rounded-lg flex items-center justify-center">
           <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
@@ -28,7 +28,7 @@
           <!-- Success Icon -->
           <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
             <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -53,8 +53,8 @@
             >
               Try different email
             </button>
-            <RouterLink 
-              to="/login" 
+            <RouterLink
+              to="/login"
               class="block w-full text-center btn-primary py-3 text-base font-medium rounded-md"
             >
               Back to login
@@ -106,7 +106,7 @@
                 />
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -171,7 +171,7 @@
       <!-- Security Notice -->
       <div class="flex items-center justify-center text-xs text-gray-500">
         <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
         <span>Secure Connection</span>
@@ -208,6 +208,7 @@
 import { ref, reactive, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { validateEmail as validateEmailUtil } from '@/utils/validation'
+import AuthService from '@/services/auth'
 
 // Form state
 const form = reactive({
@@ -261,38 +262,29 @@ const startResendTimer = () => {
 // Submit handler
 const handleSubmit = async () => {
   errorMessage.value = ''
-  
+
   if (!validateForm()) {
     return
   }
-  
+
   loading.value = true
-  
+
   try {
-    // TODO: Replace with actual API call
-    // await authStore.requestPasswordReset(form.email)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
+    await AuthService.requestPasswordReset(form.email)
+
     // Success
     emailSent.value = true
     startResendTimer()
-    
-  } catch (error: unknown) {
+
+  } catch (error: any) {
     console.error('Password reset request failed:', error)
-    
-    if (error instanceof Error && 'response' in error) {
-      const err = error as { response?: { status: number, data?: { error_description?: string } } }
-      if (err.response?.status === 404) {
-        errorMessage.value = 'No account found with this email address'
-      } else if (err.response?.status === 429) {
-        errorMessage.value = 'Too many requests. Please try again later'
-      } else {
-        errorMessage.value = err.response?.data?.error_description || 'An error occurred. Please try again'
-      }
+
+    if (error?.response?.status === 404) {
+      errorMessage.value = 'No account found with this email address'
+    } else if (error?.response?.status === 429) {
+      errorMessage.value = 'Too many requests. Please try again later'
     } else {
-       errorMessage.value = 'An unexpected error occurred. Please try again'
+      errorMessage.value = error?.response?.data?.error_description || 'An error occurred. Please try again'
     }
   } finally {
     loading.value = false
@@ -302,20 +294,16 @@ const handleSubmit = async () => {
 // Resend handler
 const handleResend = async () => {
   if (resendTimer.value > 0) return
-  
+
   loading.value = true
   errorMessage.value = ''
-  
+
   try {
-    // TODO: Replace with actual API call
-    // await authStore.requestPasswordReset(form.email)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await AuthService.requestPasswordReset(form.email)
+
     startResendTimer()
-    
-  } catch (error: unknown) {
+
+  } catch (error: any) {
     console.error('Resend failed:', error)
     errorMessage.value = 'Failed to resend email. Please try again'
   } finally {
@@ -330,7 +318,7 @@ const resetForm = () => {
   errors.email = ''
   errorMessage.value = ''
   resendTimer.value = 0
-  
+
   if (timerInterval !== null) {
     clearInterval(timerInterval)
     timerInterval = null
@@ -349,4 +337,4 @@ onUnmounted(() => {
 /* Component-specific styles if needed */
 </style>
 
- 
+
