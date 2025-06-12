@@ -15,6 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ucc-network
 
   redis:
     image: redis:7-alpine
@@ -28,6 +30,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ucc-network
 
   ollama:
     build:
@@ -38,9 +42,6 @@ services:
       - ollama_data:/root/.ollama
     ports:
       - "11434:11434"
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
       - OLLAMA_MODELS=/root/.ollama/models
@@ -58,6 +59,8 @@ services:
           memory: 8G
         reservations:
           memory: 4G
+    networks:
+      - ucc-network
 
   action-server:
     build:
@@ -88,6 +91,8 @@ services:
     depends_on:
       - ollama
     command: ["start", "--actions", "actions", "--cors", "*", "--debug"]
+    networks:
+      - ucc-network
 
   # Rasa chatbot (optional, comment out if not needed)
   rasa:
@@ -121,6 +126,8 @@ services:
       - action-server
       - ollama
     entrypoint: ["/app/entrypoint.sh"]
+    networks:
+      - ucc-network
 
   backend:
     build:
@@ -153,8 +160,14 @@ services:
       rasa:
         condition: service_started
     entrypoint: ["/app/backend_entrypoint.sh"]
+    networks:
+      - ucc-network
 
 volumes:
   postgres_data:
   redis_data:
   ollama_data:
+
+networks:
+  ucc-network:
+    driver: bridge

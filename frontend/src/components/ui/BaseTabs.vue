@@ -32,7 +32,7 @@
   </TabGroup>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 

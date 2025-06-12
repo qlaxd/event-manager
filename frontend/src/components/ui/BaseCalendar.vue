@@ -68,7 +68,6 @@ interface CalendarDay {
 interface Event {
   id: number
   occurrence: Date
-  [key: string]: any
 }
 
 // Props

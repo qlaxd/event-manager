@@ -1,13 +1,13 @@
 // Export all UI components for easy importing
-export { default as Button } from './Button.vue'
-export { default as Input } from './Input.vue'
-export { default as Modal } from './Modal.vue'
-export { default as Dropdown } from './Dropdown.vue'
+export { default as BaseButton } from './BaseButton.vue'
+export { default as BaseInput } from './BaseInput.vue'
+export { default as BaseModal } from './BaseModal.vue'
+export { default as BaseDropdown } from './BaseDropdown.vue'
 export { default as DropdownItem } from './DropdownItem.vue'
-export { default as Tabs } from './Tabs.vue'
-export { default as Accordion } from './Accordion.vue'
-export { default as Alert } from './Alert.vue'
-export { default as Sidebar } from './Sidebar.vue'
+export { default as BaseTabs } from './BaseTabs.vue'
+export { default as BaseAccordion } from './BaseAccordion.vue'
+export { default as BaseAlert } from './BaseAlert.vue'
+export { default as TheSidebar } from './TheSidebar.vue'
 
 // Re-export Headless UI components for convenience
 export {
@@ -30,5 +30,5 @@ export {
   DisclosurePanel,
   Popover,
   PopoverButton,
-  PopoverPanel
+  PopoverPanel,
 } from '@headlessui/vue' 

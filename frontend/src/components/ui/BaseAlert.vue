@@ -55,7 +55,7 @@
   </Transition>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -93,13 +93,6 @@ const handleDismiss = () => {
 
 // Icon components as strings for dynamic rendering
 const iconComponent = computed(() => {
-  const icons = {
-    success: 'CheckCircleIcon',
-    warning: 'ExclamationTriangleIcon', 
-    error: 'XCircleIcon',
-    info: 'InformationCircleIcon'
-  }
-  
   // Return SVG directly since we don't have Heroicons
   return 'svg'
 })

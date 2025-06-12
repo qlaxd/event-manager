@@ -34,7 +34,7 @@
   </Menu>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Menu, MenuButton, MenuItems } from '@headlessui/vue'
 

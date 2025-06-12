@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
-import { getToken, setToken, removeToken, isTokenExpired } from '@/utils/auth'
+import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
 // Create axios instance
@@ -15,34 +15,32 @@ const apiClient = axios.create({
 
 // Track if we're currently refreshing the token
 let isRefreshing = false
-let refreshSubscribers: Array<(token: string) => void> = []
+let failedQueue: Array<{
+  resolve: (value: unknown) => void
+  reject: (reason?: unknown) => void
+}> = []
 
-// Subscribe to token refresh
-const subscribeTokenRefresh = (callback: (token: string) => void) => {
-  refreshSubscribers.push(callback)
-}
-
-// Notify all subscribers when token is refreshed
-const onTokenRefreshed = (token: string) => {
-  refreshSubscribers.forEach(callback => callback(token))
-  refreshSubscribers = []
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
 }
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
-    const token = getToken('access')
-    
-    if (token && config.headers) {
-      // Add the token to the Authorization header
-      config.headers.Authorization = `Bearer ${token}`
+  (config: InternalAxiosRequestConfig) => {
+    const authStore = useAuthStore()
+    if (authStore.accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${authStore.accessToken}`
     }
-    
     return config
   },
-  (error: AxiosError) => {
-    return Promise.reject(error)
-  }
+  (error: AxiosError) => Promise.reject(error)
 )
 
 // Response interceptor
@@ -50,65 +48,58 @@ apiClient.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
-    
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-      
-      // Only attempt to refresh the token if we're not already doing so
-      if (!isRefreshing) {
-        isRefreshing = true
-        
-        try {
-          // The refresh token is sent automatically as an HttpOnly cookie
-          const response = await axios.post(`${originalRequest.baseURL}/auth/refresh`, {
-            grant_type: 'refresh_token'
-          }, {
-            withCredentials: true // Important: Send cookies with the request
-          })
-          
-          const { access_token } = response.data
-          
-          // Store new access token in memory
-          setToken('access', access_token)
-          
-          // Update failed request
-          originalRequest.headers.Authorization = `Bearer ${access_token}`
-          
-          // Notify subscribers
-          onTokenRefreshed(access_token)
-          
-          isRefreshing = false
-          
-          // Retry original request
-          return apiClient(originalRequest)
-        } catch (refreshError) {
-          isRefreshing = false
-          removeToken('access')
-          router.push('/login')
-          return Promise.reject(refreshError)
-        }
-      } else {
-        // Wait for the token to be refreshed
-        return new Promise(resolve => {
-          subscribeTokenRefresh((token: string) => {
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error)
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject })
+      })
+        .then(token => {
+          if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${token}`
-            resolve(apiClient(originalRequest))
-          })
+          }
+          return apiClient(originalRequest)
         })
+        .catch(err => Promise.reject(err))
+    }
+
+    originalRequest._retry = true
+    isRefreshing = true
+
+    const authStore = useAuthStore()
+
+    try {
+      const refreshResponse = await axios.post(
+        `${apiClient.defaults.baseURL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      )
+
+      const newAccessToken = refreshResponse.data.access_token
+      authStore.setAccessToken(newAccessToken)
+
+      if (originalRequest.headers) {
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
       }
+      processQueue(null, newAccessToken)
+
+      return apiClient(originalRequest)
+    } catch (refreshError: unknown) {
+      processQueue(refreshError as Error, null)
+      await authStore.logout()
+      
+      const currentPath = router.currentRoute.value.fullPath
+      if (currentPath !== '/login') {
+         authStore.setReturnUrl(currentPath)
+         router.push('/login')
+      }
+
+      return Promise.reject(refreshError)
+    } finally {
+      isRefreshing = false
     }
-    
-    // Handle other errors
-    if (error.response?.status === 403) {
-      // Forbidden - user doesn't have permission
-      console.error('Permission denied')
-    } else if (error.response?.status === 500) {
-      // Server error
-      console.error('Server error')
-    }
-    
-    return Promise.reject(error)
   }
 )
 

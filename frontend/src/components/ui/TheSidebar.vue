@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import {
@@ -133,7 +133,7 @@ interface User {
 interface NavigationItem {
   name: string
   to: string
-  icon: any
+  icon: Component
 }
 
 interface Props {

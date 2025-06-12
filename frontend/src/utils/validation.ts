@@ -71,7 +71,7 @@ export const validateTOTPCode = (code: string): boolean => {
 }
 
 // Required field validation
-export const required = (value: any, fieldName: string = 'Field'): string | null => {
+export const required = (value: string | number | null | undefined, fieldName: string = 'Field'): string | null => {
   if (!value || (typeof value === 'string' && !value.trim())) {
     return `${fieldName} is required`
   }
@@ -107,8 +107,8 @@ export const isFutureDate = (date: string | Date): boolean => {
 }
 
 // Compose validators
-export const composeValidators = (...validators: Array<(value: any) => string | null>) => {
-  return (value: any): string | null => {
+export const composeValidators = (...validators: Array<(value: string | number | null | undefined) => string | null>) => {
+  return (value: string | number | null | undefined): string | null => {
     for (const validator of validators) {
       const error = validator(value)
       if (error) return error

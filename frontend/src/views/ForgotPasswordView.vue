@@ -279,15 +279,20 @@ const handleSubmit = async () => {
     emailSent.value = true
     startResendTimer()
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Password reset request failed:', error)
     
-    if (error.response?.status === 404) {
-      errorMessage.value = 'No account found with this email address'
-    } else if (error.response?.status === 429) {
-      errorMessage.value = 'Too many requests. Please try again later'
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { status: number, data?: { error_description?: string } } }
+      if (err.response?.status === 404) {
+        errorMessage.value = 'No account found with this email address'
+      } else if (err.response?.status === 429) {
+        errorMessage.value = 'Too many requests. Please try again later'
+      } else {
+        errorMessage.value = err.response?.data?.error_description || 'An error occurred. Please try again'
+      }
     } else {
-      errorMessage.value = error.response?.data?.error_description || 'An error occurred. Please try again'
+       errorMessage.value = 'An unexpected error occurred. Please try again'
     }
   } finally {
     loading.value = false
@@ -310,7 +315,7 @@ const handleResend = async () => {
     
     startResendTimer()
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Resend failed:', error)
     errorMessage.value = 'Failed to resend email. Please try again'
   } finally {

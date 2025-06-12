@@ -9,11 +9,6 @@ interface TokenResponse {
   scope?: string
 }
 
-interface RefreshTokenRequest {
-  grant_type: 'refresh_token'
-  refresh_token: string
-}
-
 class AuthService {
   async login(credentials: LoginRequest): Promise<TokenResponse> {
     // Transform to OAuth2 password flow format
@@ -35,30 +30,14 @@ class AuthService {
     return response.data;
   }
 
-  async refreshToken(refreshToken: string): Promise<TokenResponse> {
-    const params = new URLSearchParams();
-    params.append('grant_type', 'refresh_token');
-    params.append('refresh_token', refreshToken);
-    
-    const response = await apiClient.post<TokenResponse>('/auth/refresh', params, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-    
-    return response.data;
-  }
-
   async getProfile(): Promise<User> {
     const response = await apiClient.get<User>('/users/me');
     return response.data;
   }
 
-  async logout(token: string): Promise<void> {
-    await apiClient.post('/auth/revoke', {
-      token,
-      token_type_hint: 'refresh_token'
-    });
+  async logout(): Promise<void> {
+    // The backend will read the HttpOnly refresh token cookie
+    await apiClient.post('/auth/revoke');
   }
 
   async requestPasswordReset(email: string): Promise<{ message: string }> {

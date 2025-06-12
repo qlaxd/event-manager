@@ -22,7 +22,7 @@
     <!-- Main Layout Container -->
     <div class="flex h-screen lg:h-screen">
       <!-- Left Sidebar -->
-      <Sidebar 
+      <TheSidebar 
         :user="user" 
         :is-open="sidebarOpen"
         @logout="handleLogout"
@@ -32,199 +32,207 @@
       <!-- Main Content -->
       <div class="flex-1 overflow-y-auto w-full">
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div class="px-4 py-6 sm:px-0">
-        <!-- Page Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
-          <p class="mt-2 text-gray-600">Manage your account security and preferences</p>
-        </div>
-
-        <div class="space-y-8">
-          <!-- Profile Information Section -->
-          <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-semibold text-gray-900">Profile Information</h2>
-            </div>
-            <div class="px-6 py-6">
-              <form @submit.prevent="handleUpdateProfile" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Input
-                      v-model="profileForm.full_name"
-                      label="Full Name"
-                      type="text"
-                      required
-                      :error="profileErrors.full_name"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      v-model="profileForm.email"
-                      label="Email Address"
-                      type="email"
-                      required
-                      :error="profileErrors.email"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Button 
-                    type="submit" 
-                    variant="primary"
-                    :loading="profileLoading"
-                    loading-text="Updating..."
-                  >
-                    Update Profile
-                  </Button>
-                </div>
-              </form>
-            </div>
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
+            <p class="mt-2 text-gray-600">Manage your account security and preferences</p>
           </div>
 
-          <!-- Password Section -->
-          <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-semibold text-gray-900">Password</h2>
-            </div>
-            <div class="px-6 py-6">
-              <form @submit.prevent="handleChangePassword" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Input
-                      v-model="passwordForm.current_password"
-                      label="Current Password"
-                      type="password"
-                      required
-                      :error="passwordErrors.current_password"
-                    />
+          <div class="space-y-8">
+            <!-- Profile Information Section -->
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Profile Information</h2>
+              </div>
+              <div class="px-6 py-6">
+                <form @submit.prevent="handleUpdateProfile" class="space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <BaseInput
+                        v-model="profileForm.full_name"
+                        label="Full Name"
+                        type="text"
+                        required
+                        :error="profileErrors.full_name"
+                      />
+                    </div>
+                    <div>
+                      <BaseInput
+                        v-model="profileForm.email"
+                        label="Email Address"
+                        type="email"
+                        required
+                        :error="profileErrors.email"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <Input
-                      v-model="passwordForm.new_password"
-                      label="New Password"
-                      type="password"
-                      required
-                      :error="passwordErrors.new_password"
-                    />
+                    <BaseButton 
+                      type="submit" 
+                      variant="primary"
+                      :loading="profileLoading"
+                      loading-text="Updating..."
+                    >
+                      Update Profile
+                    </BaseButton>
                   </div>
-                </div>
-                <div>
-                  <Button 
-                    type="submit" 
-                    variant="primary"
-                    :loading="passwordLoading"
-                    loading-text="Changing..."
-                  >
-                    Change Password
-                  </Button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
-          </div>
 
-          <!-- Multi-Factor Authentication Section -->
-          <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-semibold text-gray-900">Multi-Factor Authentication</h2>
-            </div>
-            <div class="px-6 py-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-base font-medium text-gray-900">Two-Factor Authentication</h3>
-                  <p class="text-sm text-gray-600">Add an extra layer of security to your account</p>
-                  <div class="mt-2 flex items-center">
-                    <svg 
-                      :class="[
-                        'h-4 w-4 mr-2',
-                        user?.mfa_enabled ? 'text-green-500' : 'text-gray-400'
-                      ]" 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                    >
-                      <path 
-                        v-if="user?.mfa_enabled"
-                        fill-rule="evenodd" 
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
-                        clip-rule="evenodd" 
+            <!-- Password Section -->
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Password</h2>
+              </div>
+              <div class="px-6 py-6">
+                <form @submit.prevent="handleChangePassword" class="space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <BaseInput
+                        v-model="passwordForm.current_password"
+                        label="Current Password"
+                        type="password"
+                        required
+                        :error="passwordErrors.current_password"
                       />
-                      <path 
-                        v-else
-                        fill-rule="evenodd" 
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
-                        clip-rule="evenodd" 
+                    </div>
+                    <div>
+                      <BaseInput
+                        v-model="passwordForm.new_password"
+                        label="New Password"
+                        type="password"
+                        required
+                        :error="passwordErrors.new_password"
                       />
-                    </svg>
-                    <span 
-                      :class="[
-                        'text-sm font-medium',
-                        user?.mfa_enabled ? 'text-green-700' : 'text-gray-500'
-                      ]"
-                    >
-                      {{ user?.mfa_enabled ? 'Enabled' : 'Disabled' }}
-                    </span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Button 
-                    v-if="!user?.mfa_enabled"
-                    variant="primary"
-                    :loading="mfaLoading"
-                    @click="handleSetupMFA"
-                  >
-                    Set up MFA
-                  </Button>
-                  <Button 
-                    v-else
-                    variant="outline"
-                    :loading="mfaLoading"
-                    @click="handleDisableMFA"
-                  >
-                    Disable MFA
-                  </Button>
+                  <div>
+                    <BaseButton 
+                      type="submit" 
+                      variant="primary"
+                      :loading="passwordLoading"
+                      loading-text="Changing..."
+                    >
+                      Change Password
+                    </BaseButton>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Multi-Factor Authentication Section -->
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Multi-Factor Authentication</h2>
+              </div>
+              <div class="px-6 py-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-base font-medium text-gray-900">Two-Factor Authentication</h3>
+                    <p class="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                    <div class="mt-2 flex items-center">
+                      <svg 
+                        :class="[
+                          'h-4 w-4 mr-2',
+                          user?.mfa_enabled ? 'text-green-500' : 'text-gray-400'
+                        ]" 
+                        fill="currentColor" 
+                        viewBox="0 0 20 20"
+                      >
+                        <path 
+                          v-if="user?.mfa_enabled"
+                          fill-rule="evenodd" 
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
+                          clip-rule="evenodd" 
+                        />
+                        <path 
+                          v-else
+                          fill-rule="evenodd" 
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
+                          clip-rule="evenodd" 
+                        />
+                      </svg>
+                      <span 
+                        :class="[
+                          'text-sm font-medium',
+                          user?.mfa_enabled ? 'text-green-700' : 'text-gray-500'
+                        ]"
+                      >
+                        {{ user?.mfa_enabled ? 'Enabled' : 'Disabled' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <BaseButton 
+                      v-if="!user?.mfa_enabled"
+                      variant="primary"
+                      :loading="mfaLoading"
+                      @click="showMFASetupModal = true"
+                    >
+                      Set up MFA
+                    </BaseButton>
+                    <BaseButton 
+                      v-else
+                      variant="outline"
+                      :loading="mfaLoading"
+                      @click="showDisableMFAModal = true"
+                    >
+                      Disable MFA
+                    </BaseButton>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- MFA Setup Modal -->
-    <Modal
+    <BaseModal
       v-model:show="showMFASetupModal"
       title="Set up Two-Factor Authentication"
       size="md"
       :closable="!mfaLoading"
     >
-      <div v-if="mfaSetupStep === 'setup'" class="space-y-6">
+      <div v-if="mfaStep === 'verify_password'" class="space-y-6">
         <div class="text-center">
           <p class="text-sm text-gray-600 mb-4">
-            Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+            First, please confirm your current password to continue.
           </p>
-          <div class="flex justify-center mb-4">
-            <div class="p-4 bg-white border-2 border-gray-300 rounded-lg">
-              <img :src="mfaQRCode" alt="MFA QR Code" class="w-48 h-48" />
-            </div>
-          </div>
-          <div class="text-xs text-gray-500 break-all">
-            <p>Manual entry key:</p>
-            <code class="bg-gray-100 px-2 py-1 rounded">{{ mfaSecret }}</code>
-          </div>
-        </div>
-        
-        <div>
-          <Input
-            v-model="mfaVerificationCode"
-            label="Enter verification code"
-            placeholder="000000"
-            :error="mfaErrors.code"
-            maxlength="6"
+          <BaseInput
+            v-model="mfaPassword"
+            label="Current Password"
+            type="password"
+            required
           />
         </div>
       </div>
 
-      <div v-if="mfaSetupStep === 'backup-codes'" class="space-y-6">
+      <div v-if="mfaStep === 'scan_qr'" class="space-y-6 text-center">
+        <div>
+          <p class="text-sm text-gray-600 mb-4">
+            Scan the QR code with your authenticator app.
+          </p>
+          <img :src="mfaQRCode" alt="MFA QR Code" class="mx-auto border p-2 bg-white" />
+          <p class="text-sm text-gray-500 mt-1">Or enter this code manually:</p>
+          <code class="text-lg bg-gray-100 p-2 rounded">{{ mfaSecret }}</code>
+        </div>
+        <hr />
+        <div>
+          <p class="text-sm text-gray-600 mb-4">
+            Then, enter the 6-digit code from your app below.
+          </p>
+          <BaseInput
+            v-model="mfaVerificationCode"
+            label="Verification Code"
+            required
+          />
+        </div>
+      </div>
+
+      <div v-if="mfaStep === 'backup_codes'" class="space-y-6">
         <div>
           <h3 class="text-lg font-medium text-gray-900 mb-2">Backup Codes</h3>
           <p class="text-sm text-gray-600 mb-4">
@@ -241,62 +249,77 @@
       </div>
 
       <template #footer>
-        <div v-if="mfaSetupStep === 'setup'" class="flex justify-end space-x-3">
-          <Button variant="outline" @click="showMFASetupModal = false" :disabled="mfaLoading">
+        <div class="flex justify-end space-x-3">
+          <BaseButton variant="outline" @click="cancelMFASetup" :disabled="mfaLoading">
             Cancel
-          </Button>
-          <Button 
-            variant="primary" 
+          </BaseButton>
+          <BaseButton 
+            v-if="mfaStep === 'verify_password'"
+            variant="primary"
             :loading="mfaLoading"
-            @click="handleVerifyMFASetup"
-            :disabled="!mfaVerificationCode || mfaVerificationCode.length !== 6"
+            @click="handleEnableMfa"
+          >
+            Continue
+          </BaseButton>
+          <BaseButton 
+            v-if="mfaStep === 'scan_qr'"
+            variant="primary"
+            :loading="mfaLoading"
+            @click="handleVerifyMfa"
           >
             Verify & Enable
-          </Button>
-        </div>
-        <div v-if="mfaSetupStep === 'backup-codes'" class="flex justify-end">
-          <Button variant="primary" @click="handleMFASetupComplete">
-            I've saved my backup codes
-          </Button>
+          </BaseButton>
+          <BaseButton 
+            v-if="mfaStep === 'backup_codes'"
+            variant="primary"
+            @click="closeMFASetup"
+          >
+            Done
+          </BaseButton>
         </div>
       </template>
-    </Modal>
+    </BaseModal>
 
-    <!-- MFA Disable Modal -->
-    <Modal
-      v-model:show="showMFADisableModal"
+    <!-- Disable MFA Modal -->
+    <BaseModal
+      v-model:show="showDisableMFAModal"
       title="Disable Two-Factor Authentication"
       size="md"
     >
       <div class="space-y-4">
         <p class="text-sm text-gray-600">
-          Please enter your password to disable two-factor authentication.
+          To disable 2FA, please enter your password and a code from your authenticator app.
         </p>
-        <Input
-          v-model="mfaDisablePassword"
-          label="Password"
+        <BaseInput
+          v-model="disableMfaForm.password"
+          label="Current Password"
           type="password"
           required
           :error="mfaErrors.password"
+        />
+        <BaseInput
+          v-model="disableMfaForm.mfa_code"
+          label="Authenticator Code"
+          required
         />
       </div>
 
       <template #footer>
         <div class="flex justify-end space-x-3">
-          <Button variant="outline" @click="showMFADisableModal = false" :disabled="mfaLoading">
+          <BaseButton variant="outline" @click="showDisableMFAModal = false" :disabled="mfaLoading">
             Cancel
-          </Button>
-          <Button 
+          </BaseButton>
+          <BaseButton 
             variant="danger"
             :loading="mfaLoading"
-            @click="handleConfirmDisableMFA"
-            :disabled="!mfaDisablePassword"
+            @click="confirmDisableMfa"
+            :disabled="!disableMfaForm.password || !disableMfaForm.mfa_code"
           >
             Disable MFA
-          </Button>
+          </BaseButton>
         </div>
       </template>
-    </Modal>
+    </BaseModal>
 
     <!-- Success/Error Notifications -->
     <div 
@@ -307,44 +330,48 @@
         notification.show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       ]"
     >
-      <Alert
+      <BaseAlert
         :variant="notification.type"
         :title="notification.title"
         :message="notification.message"
         @close="hideNotification"
       />
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import userService from '@/services/user'
 import authService from '@/services/auth'
-import { Button, Input, Modal, Dropdown, DropdownItem, Alert, Sidebar } from '@/components/ui'
+import { BaseButton, BaseInput, BaseModal, BaseAlert, TheSidebar } from '@/components/ui'
 import { CalendarIcon, Bars3Icon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-// Reactive data
-const { user } = authStore
+const user = computed(() => authStore.user)
 const sidebarOpen = ref(false)
+
+// Notification state
+const notification = reactive({
+  show: false,
+  type: 'success' as 'success' | 'danger',
+  title: '',
+  message: ''
+})
 
 // Profile form
 const profileForm = reactive({
   full_name: '',
   email: ''
 })
-
 const profileErrors = reactive({
   full_name: '',
   email: ''
 })
-
 const profileLoading = ref(false)
 
 // Password form
@@ -352,69 +379,49 @@ const passwordForm = reactive({
   current_password: '',
   new_password: ''
 })
-
 const passwordErrors = reactive({
   current_password: '',
   new_password: ''
 })
-
 const passwordLoading = ref(false)
 
-// MFA
+// MFA state
 const mfaLoading = ref(false)
 const showMFASetupModal = ref(false)
-const showMFADisableModal = ref(false)
-const mfaSetupStep = ref<'setup' | 'backup-codes'>('setup')
+const showDisableMFAModal = ref(false)
+const mfaStep = ref<'verify_password' | 'scan_qr' | 'backup_codes'>('verify_password')
+const mfaPassword = ref('')
 const mfaQRCode = ref('')
 const mfaSecret = ref('')
-const mfaBackupCodes = ref<string[]>([])
 const mfaVerificationCode = ref('')
-const mfaDisablePassword = ref('')
-
+const mfaBackupCodes = ref<string[]>([])
+const disableMfaForm = reactive({
+  password: '',
+  mfa_code: ''
+})
 const mfaErrors = reactive({
-  code: '',
-  password: ''
-})
-
-// Notifications
-const notification = reactive({
-  show: false,
-  type: 'success' as 'success' | 'error' | 'warning' | 'info',
-  title: '',
-  message: ''
-})
-
-// Initialize form data
-onMounted(() => {
-  if (user) {
-    profileForm.full_name = user.full_name
-    profileForm.email = user.email
-  }
+  password: '',
+  verificationCode: ''
 })
 
 // Methods
-const clearProfileErrors = () => {
-  profileErrors.full_name = ''
-  profileErrors.email = ''
+onMounted(() => {
+  if (user.value) {
+    profileForm.full_name = user.value.full_name
+    profileForm.email = user.value.email
+  }
+})
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
 }
 
-const clearPasswordErrors = () => {
-  passwordErrors.current_password = ''
-  passwordErrors.new_password = ''
-}
-
-const clearMFAErrors = () => {
-  mfaErrors.code = ''
-  mfaErrors.password = ''
-}
-
-const showNotification = (type: typeof notification.type, title: string, message: string) => {
+const showNotification = (type: 'success' | 'danger', title: string, message: string) => {
   notification.type = type
   notification.title = title
   notification.message = message
   notification.show = true
-  
-  // Auto hide after 5 seconds
   setTimeout(() => {
     hideNotification()
   }, 5000)
@@ -424,148 +431,133 @@ const hideNotification = () => {
   notification.show = false
 }
 
-const handleLogout = async () => {
-  try {
-    await authStore.logout()
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout error:', error)
-  }
-}
-
+// Profile update logic
 const handleUpdateProfile = async () => {
-  clearProfileErrors()
   profileLoading.value = true
-
+  profileErrors.full_name = ''
+  profileErrors.email = ''
   try {
-    const response = await userService.updateProfile({
+    await userService.updateProfile({
       full_name: profileForm.full_name,
       email: profileForm.email
     })
-
-         // Update user in store
-     authStore.updateUser(response.user)
-    
-    showNotification('success', 'Success', 'Profile updated successfully')
-  } catch (error: any) {
-    console.error('Profile update error:', error)
-    
-    if (error.response?.data?.errors) {
-      const errors = error.response.data.errors
-      if (errors.full_name) profileErrors.full_name = errors.full_name[0]
-      if (errors.email) profileErrors.email = errors.email[0]
+    showNotification('success', 'Profile Updated', 'Your profile information has been successfully updated.')
+    // Refresh user data in store
+    await authStore.fetchUser()
+  } catch (error: unknown) {
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { data?: { detail?: string | any[] } } }
+      const detail = err.response?.data?.detail
+      if (Array.isArray(detail)) {
+        detail.forEach((e: any) => {
+          if (e.loc.includes('full_name')) profileErrors.full_name = e.msg
+          if (e.loc.includes('email')) profileErrors.email = e.msg
+        })
+      } else {
+        showNotification('danger', 'Update Failed', detail || 'An unknown error occurred.')
+      }
     } else {
-      showNotification('error', 'Error', 'Failed to update profile. Please try again.')
+      showNotification('danger', 'Update Failed', 'An unknown error occurred.')
     }
   } finally {
     profileLoading.value = false
   }
 }
 
+// Password change logic
 const handleChangePassword = async () => {
-  clearPasswordErrors()
   passwordLoading.value = true
-
+  passwordErrors.current_password = ''
+  passwordErrors.new_password = ''
   try {
     await userService.changePassword({
       current_password: passwordForm.current_password,
       new_password: passwordForm.new_password
     })
-
-    // Clear form
+    showNotification('success', 'Password Changed', 'Your password has been changed successfully.')
     passwordForm.current_password = ''
     passwordForm.new_password = ''
-    
-    showNotification('success', 'Success', 'Password changed successfully')
-  } catch (error: any) {
-    console.error('Password change error:', error)
-    
-    if (error.response?.data?.errors) {
-      const errors = error.response.data.errors
-      if (errors.current_password) passwordErrors.current_password = errors.current_password[0]
-      if (errors.new_password) passwordErrors.new_password = errors.new_password[0]
+  } catch (error: unknown) {
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { data?: { detail?: string } } }
+      showNotification('danger', 'Change Failed', err.response?.data?.detail || 'Failed to change password.')
     } else {
-      showNotification('error', 'Error', 'Failed to change password. Please try again.')
+      showNotification('danger', 'Change Failed', 'An unknown error occurred.')
     }
   } finally {
     passwordLoading.value = false
   }
 }
 
-const handleSetupMFA = async () => {
-  mfaLoading.value = true
-  clearMFAErrors()
+// MFA logic
+const cancelMFASetup = () => {
+  showMFASetupModal.value = false
+  mfaStep.value = 'verify_password'
+  mfaPassword.value = ''
+  mfaVerificationCode.value = ''
+}
 
+const closeMFASetup = () => {
+  showMFASetupModal.value = false
+}
+
+const handleEnableMfa = async () => {
+  mfaLoading.value = true
   try {
-    const response = await authService.enableMFA(passwordForm.current_password)
-    
+    const response = await authService.enableMFA(mfaPassword.value)
     mfaQRCode.value = response.qr_code
     mfaSecret.value = response.secret
+    mfaStep.value = 'scan_qr'
+  } catch (error: unknown) {
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { data?: { detail?: string } } }
+      showNotification('danger', 'MFA Setup Failed', err.response?.data?.detail || 'Could not initiate MFA setup.')
+    } else {
+      showNotification('danger', 'MFA Setup Failed', 'An unknown error occurred.')
+    }
+  } finally {
+    mfaLoading.value = false
+  }
+}
+
+const handleVerifyMfa = async () => {
+  mfaLoading.value = true
+  try {
+    const response = await authService.verifyMFASetup(mfaVerificationCode.value)
     mfaBackupCodes.value = response.backup_codes
-    mfaSetupStep.value = 'setup'
-    showMFASetupModal.value = true
-  } catch (error: any) {
-    console.error('MFA setup error:', error)
-    showNotification('error', 'Error', 'Failed to set up MFA. Please try again.')
+    mfaStep.value = 'backup_codes'
+    await authStore.fetchUser() // Refresh user data
+  } catch (error: unknown) {
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { data?: { detail?: string } } }
+      showNotification('danger', 'Verification Failed', err.response?.data?.detail || 'Invalid verification code.')
+    } else {
+      showNotification('danger', 'Verification Failed', 'An unknown error occurred.')
+    }
   } finally {
     mfaLoading.value = false
   }
 }
 
-const handleVerifyMFASetup = async () => {
-  clearMFAErrors()
+const confirmDisableMfa = async () => {
   mfaLoading.value = true
-
+  mfaErrors.password = ''
   try {
-    await authService.verifyMFASetup(mfaVerificationCode.value)
-    
-    // Update user MFA status
-    if (authStore.user) {
-      authStore.user.mfa_enabled = true
+    await authService.disableMFA(disableMfaForm.password, disableMfaForm.mfa_code)
+    showNotification('success', 'MFA Disabled', 'Two-factor authentication has been disabled.')
+    showDisableMFAModal.value = false
+    await authStore.fetchUser()
+  } catch (error: unknown) {
+    if (error instanceof Error && 'response' in error) {
+      const err = error as { response?: { data?: { detail?: string } } }
+      showNotification('danger', 'Disabling MFA Failed', err.response?.data?.detail || 'An error occurred.')
+    } else {
+      showNotification('danger', 'Disabling MFA Failed', 'An unknown error occurred.')
     }
-    
-    mfaSetupStep.value = 'backup-codes'
-  } catch (error: any) {
-    console.error('MFA verification error:', error)
-    mfaErrors.code = 'Invalid verification code'
   } finally {
     mfaLoading.value = false
-  }
-}
-
-const handleMFASetupComplete = () => {
-  showMFASetupModal.value = false
-  mfaSetupStep.value = 'setup'
-  mfaVerificationCode.value = ''
-  showNotification('success', 'Success', 'Two-factor authentication has been enabled')
-}
-
-const handleDisableMFA = () => {
-  mfaDisablePassword.value = ''
-  clearMFAErrors()
-  showMFADisableModal.value = true
-}
-
-const handleConfirmDisableMFA = async () => {
-  clearMFAErrors()
-  mfaLoading.value = true
-
-  try {
-    await authService.disableMFA(mfaDisablePassword.value, mfaVerificationCode.value)
-    
-    // Update user MFA status
-    if (authStore.user) {
-      authStore.user.mfa_enabled = false
-    }
-    
-    showMFADisableModal.value = false
-    mfaDisablePassword.value = ''
-    showNotification('success', 'Success', 'Two-factor authentication has been disabled')
-  } catch (error: any) {
-    console.error('MFA disable error:', error)
-    mfaErrors.password = 'Invalid password'
-  } finally {
-    mfaLoading.value = false
+    disableMfaForm.password = ''
+    disableMfaForm.mfa_code = ''
   }
 }
 </script> 

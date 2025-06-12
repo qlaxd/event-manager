@@ -7,7 +7,7 @@ A comprehensive set of UI components built with Headless UI Vue and Tailwind CSS
 All components are exported from the index file:
 
 ```javascript
-import { Button, Input, Modal, Dropdown, DropdownItem, Tabs, Accordion, Alert } from '@/components/ui'
+import { BaseButton, BaseInput, BaseModal, BaseDropdown, DropdownItem, BaseTabs, BaseAccordion, BaseAlert } from '@/components/ui'
 ```
 
 ## Components
@@ -20,30 +20,30 @@ Flexible button component with multiple variants, sizes, and states.
 <template>
   <div class="space-x-4">
     <!-- Basic buttons -->
-    <Button variant="primary">Primary</Button>
-    <Button variant="secondary">Secondary</Button>
-    <Button variant="danger">Danger</Button>
-    <Button variant="ghost">Ghost</Button>
-    <Button variant="outline">Outline</Button>
+    <BaseButton variant="primary">Primary</BaseButton>
+    <BaseButton variant="secondary">Secondary</BaseButton>
+    <BaseButton variant="danger">Danger</BaseButton>
+    <BaseButton variant="ghost">Ghost</BaseButton>
+    <BaseButton variant="outline">Outline</BaseButton>
     
     <!-- Sizes -->
-    <Button size="xs">Extra Small</Button>
-    <Button size="sm">Small</Button>
-    <Button size="md">Medium</Button>
-    <Button size="lg">Large</Button>
-    <Button size="xl">Extra Large</Button>
+    <BaseButton size="xs">Extra Small</BaseButton>
+    <BaseButton size="sm">Small</BaseButton>
+    <BaseButton size="md">Medium</BaseButton>
+    <BaseButton size="lg">Large</BaseButton>
+    <BaseButton size="xl">Extra Large</BaseButton>
     
     <!-- States -->
-    <Button :loading="true" loading-text="Saving...">Save</Button>
-    <Button :disabled="true">Disabled</Button>
+    <BaseButton :loading="true" loading-text="Saving...">Save</BaseButton>
+    <BaseButton :disabled="true">Disabled</BaseButton>
     
     <!-- With icons -->
-    <Button>
+    <BaseButton>
       <template #icon-left>
         <svg class="h-4 w-4">...</svg>
       </template>
       With Icon
-    </Button>
+    </BaseButton>
   </div>
 </template>
 ```
@@ -63,7 +63,7 @@ Form input component with validation, icons, and password toggle.
 <template>
   <div class="space-y-4">
     <!-- Basic input -->
-    <Input
+    <BaseInput
       v-model="email"
       type="email"
       label="Email"
@@ -72,7 +72,7 @@ Form input component with validation, icons, and password toggle.
     />
     
     <!-- With validation -->
-    <Input
+    <BaseInput
       v-model="password"
       type="password"
       label="Password"
@@ -81,14 +81,14 @@ Form input component with validation, icons, and password toggle.
     />
     
     <!-- With icons -->
-    <Input
+    <BaseInput
       v-model="search"
       placeholder="Search..."
     >
       <template #icon-left>
         <svg class="h-5 w-5 text-gray-400">...</svg>
       </template>
-    </Input>
+    </BaseInput>
   </div>
 </template>
 ```
@@ -108,7 +108,7 @@ Modal dialog component with customizable sizes and transitions.
 
 ```vue
 <template>
-  <Modal
+  <BaseModal
     v-model:show="showModal"
     title="Confirm Action"
     size="md"
@@ -117,10 +117,10 @@ Modal dialog component with customizable sizes and transitions.
     <p>Are you sure you want to delete this item?</p>
     
     <template #footer>
-      <Button variant="outline" @click="showModal = false">Cancel</Button>
-      <Button variant="danger" @click="confirmDelete">Delete</Button>
+      <BaseButton variant="outline" @click="showModal = false">Cancel</BaseButton>
+      <BaseButton variant="danger" @click="confirmDelete">Delete</BaseButton>
     </template>
-  </Modal>
+  </BaseModal>
 </template>
 ```
 
@@ -137,11 +137,11 @@ Dropdown menu component with flexible positioning.
 
 ```vue
 <template>
-  <Dropdown trigger-text="Options" position="bottom-right">
+  <BaseDropdown trigger-text="Options" position="bottom-right">
     <DropdownItem text="Edit" @click="handleEdit" />
     <DropdownItem text="Share" @click="handleShare" />
     <DropdownItem text="Delete" variant="danger" @click="handleDelete" />
-  </Dropdown>
+  </BaseDropdown>
 </template>
 ```
 
@@ -163,7 +163,7 @@ Tab component with multiple variants and orientations.
 
 ```vue
 <template>
-  <Tabs
+  <BaseTabs
     :tabs="tabItems"
     variant="pills"
     @change="handleTabChange"
@@ -174,7 +174,7 @@ Tab component with multiple variants and orientations.
     <template #panel-1>
       <p>Content for tab 2</p>
     </template>
-  </Tabs>
+  </BaseTabs>
 </template>
 
 <script setup>
@@ -199,14 +199,14 @@ Collapsible content sections using Headless UI Disclosure.
 
 ```vue
 <template>
-  <Accordion
+  <BaseAccordion
     :items="accordionItems"
     variant="bordered"
   >
     <template #panel-0="{ item }">
       <p>Custom content for {{ item.title }}</p>
     </template>
-  </Accordion>
+  </BaseAccordion>
 </template>
 
 <script setup>
@@ -219,7 +219,8 @@ const accordionItems = [
   {
     title: 'Question 2', 
     content: 'Answer 2'
-  }
+  },
+  { title: 'Section 3', content: 'Content for section 3' }
 ]
 </script>
 ```
@@ -231,34 +232,30 @@ const accordionItems = [
 
 ### Alert
 
-Alert component for displaying notifications and messages.
+Alert component for displaying messages, with different variants.
 
 ```vue
 <template>
   <div class="space-y-4">
-    <Alert
-      variant="success"
+    <BaseAlert
       title="Success!"
-      message="Your changes have been saved."
-      @dismiss="handleDismiss"
+      message="Your profile has been updated."
+      variant="success"
+      :dismissible="true"
     />
-    
-    <Alert
-      variant="error"
-      message="Something went wrong. Please try again."
-    >
-      <template #actions>
-        <Button size="sm" variant="outline">Retry</Button>
-      </template>
-    </Alert>
+    <BaseAlert
+      title="Error"
+      message="Something went wrong."
+      variant="danger"
+    />
   </div>
 </template>
 ```
 
 **Props:**
-- `variant`: 'success' | 'warning' | 'error' | 'info'
 - `title`: string
 - `message`: string
+- `variant`: 'info' | 'success' | 'warning' | 'danger'
 - `dismissible`: boolean
 - `show`: boolean
 
