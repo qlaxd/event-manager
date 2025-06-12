@@ -31,7 +31,7 @@ async def send_password_reset_email(
     """
     try:
         # Create reset URL
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        reset_url = f"{settings.FRONTEND_URL}reset-password?token={token}"
         
         # Email content
         subject = "Password Reset - UCC Event Manager"

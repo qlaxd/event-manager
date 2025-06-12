@@ -271,20 +271,17 @@ const handleSubmit = async () => {
 
   try {
     await AuthService.requestPasswordReset(form.email)
-
-    // Success
+    // Always show generic success regardless of backend response
     emailSent.value = true
     startResendTimer()
-
   } catch (error: any) {
-    console.error('Password reset request failed:', error)
-
-    if (error?.response?.status === 404) {
-      errorMessage.value = 'No account found with this email address'
-    } else if (error?.response?.status === 429) {
+    // Only show specific error for rate limiting or server error
+    if (error?.response?.status === 429) {
       errorMessage.value = 'Too many requests. Please try again later'
     } else {
-      errorMessage.value = error?.response?.data?.error_description || 'An error occurred. Please try again'
+      // Always show generic message for all other errors (including 404, 422, etc)
+      emailSent.value = true
+      startResendTimer()
     }
   } finally {
     loading.value = false

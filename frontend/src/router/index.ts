@@ -8,6 +8,7 @@ import ChatView from '../views/ChatView.vue'
 import EventsView from '../views/EventsView.vue'
 import EventCreateView from '../views/EventCreateView.vue'
 import AnalyticsView from '../views/AnalyticsView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +59,18 @@ const router = createRouter({
       name: 'analytics',
       component: AnalyticsView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ResetPasswordView,
+      meta: { requiresAuth: false }
+    },  
+    {
+      path: '/reset-password/:token',
+      name: 'reset-password-token',
+      component: ResetPasswordView,
+      meta: { requiresAuth: false }
     }
   ]
 })
