@@ -51,6 +51,10 @@ export interface User {
     quick_replies?: string[]
   }
 
+  export interface TranscriptionResponse {
+    text: string
+  }
+
   export interface EscalateRequest {
     session_id: string
     reason: string

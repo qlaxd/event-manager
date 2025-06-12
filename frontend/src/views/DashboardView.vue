@@ -155,24 +155,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- Right Sidebar -->
-        <aside class="hidden xl:block w-80 bg-white shadow-lg p-6 overflow-y-auto">
-          <!-- Quick Actions -->
-          <div class="mb-8">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-            <div class="space-y-3">
-              <BaseButton variant="primary" full-width @click="openCreateModal">
-                <PlusIcon class="w-4 h-4 mr-2" />
-                Create Event
-              </BaseButton>
-              <BaseButton variant="outline" full-width @click="goToChat">
-                <ChatBubbleLeftRightIcon class="w-4 h-4 mr-2" />
-                Helpdesk
-              </BaseButton>
-            </div>
-          </div>
-        </aside>
       </main>
     </div>
 
@@ -204,7 +186,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   MagnifyingGlassIcon,
-  ChatBubbleLeftRightIcon,
   CalendarDaysIcon,
   PlusIcon,
   Bars3Icon,
@@ -303,10 +284,6 @@ const handleDeleteEvent = async (eventId: string) => {
   if (confirm('Are you sure you want to delete this event?')) {
     await deleteEventFromStore(eventId)
   }
-}
-
-const goToChat = () => {
-  router.push('/chat')
 }
 
 const handleLogout = async () => {

@@ -10,6 +10,8 @@ export const useHelpdeskStore = defineStore('helpdesk', () => {
   const sessionId = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isTranscribing = ref(false)
+  const transcriptionError = ref<string | null>(null)
 
   // Actions
   function startSession() {
@@ -66,12 +68,30 @@ export const useHelpdeskStore = defineStore('helpdesk', () => {
     }
   }
 
+  async function transcribeAudio(audioBlob: Blob): Promise<string> {
+    isTranscribing.value = true
+    transcriptionError.value = null
+    try {
+      const response = await helpdeskService.transcribeAudio(audioBlob)
+      return response.text
+    } catch (err) {
+      transcriptionError.value = 'Failed to transcribe audio. Please try again.'
+      console.error('Transcription error:', err)
+      throw new Error(transcriptionError.value)
+    } finally {
+      isTranscribing.value = false
+    }
+  }
+
   return {
     messages,
     sessionId,
     isLoading,
     error,
+    isTranscribing,
+    transcriptionError,
     startSession,
     sendMessage,
+    transcribeAudio,
   }
 }) 
