@@ -10,12 +10,12 @@
 
     <!-- Chat Messages -->
     <div ref="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
-      <div v-for="message in helpdeskStore.messages" :key="message.id" 
+      <div v-for="message in helpdeskStore.messages" :key="message.id"
            :class="['flex', message.sender === 'user' ? 'justify-end' : 'justify-start']">
         <div :class="[
             'max-w-lg px-4 py-2 rounded-lg shadow',
-            message.sender === 'user' 
-              ? 'bg-blue-500 text-white' 
+            message.sender === 'user'
+              ? 'bg-blue-500 text-white'
               : 'bg-white text-gray-800'
           ]">
           <p>{{ message.message }}</p>
@@ -35,7 +35,7 @@
     <footer class="bg-white border-t border-gray-200 p-4 rounded-b-lg">
       <div v-if="transcriptionError" class="text-red-500 text-xs mb-2">{{ transcriptionError }}</div>
       <div class="flex items-center space-x-3">
-        <VoiceRecorder 
+        <VoiceRecorder
           @transcription-complete="onTranscriptionComplete"
           @error="handleTranscriptionError"
         />
