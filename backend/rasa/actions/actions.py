@@ -263,15 +263,13 @@ class ActionCreateEventFromLlm(Action):
                 response = requests.post(
                     f"{OLLAMA_API_BASE}/api/generate",
                     json=llm_payload,
-                    timeout=10
+                    timeout=60
                 )
                 response.raise_for_status()
                 response_data = response.json()
                 llm_response = response_data.get("response", "")
                 
                 # Try to extract JSON from the response
-                import json
-                import re
                 
                 # Look for JSON in the response
                 json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
