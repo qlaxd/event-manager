@@ -42,7 +42,6 @@ export const useHelpdeskStore = defineStore('helpdesk', () => {
         message: messageText,
         session_id: sessionId.value!
       })
-
       const botMessage: ChatMessage = {
         id: uuidv4(),
         sender: 'bot',
