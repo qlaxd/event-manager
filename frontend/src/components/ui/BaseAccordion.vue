@@ -42,71 +42,74 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { PropType } from 'vue'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
+
+interface AccordionItem {
+  title: string
+  content?: string
+  defaultOpen?: boolean
+  [key: string]: unknown
+}
 
 const props = defineProps({
   items: {
-    type: Array,
+    type: Array as PropType<AccordionItem[]>,
     required: true,
-    validator: (items) => items.every(item => 
-      typeof item === 'object' && 
+    validator: (items: AccordionItem[]) => items.every(item =>
+      typeof item === 'object' &&
       typeof item.title === 'string'
     )
   },
   variant: {
-    type: String,
+    type: String as PropType<'default' | 'bordered' | 'flush'>,
     default: 'default',
-    validator: (value) => ['default', 'bordered', 'flush'].includes(value)
+    validator: (value: string) => ['default', 'bordered', 'flush'].includes(value)
   },
   size: {
-    type: String,
+    type: String as PropType<'sm' | 'md' | 'lg'>,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg'].includes(value)
+    validator: (value: string) => ['sm', 'md', 'lg'].includes(value)
   }
 })
 
 const itemClasses = computed(() => {
-  const variants = {
+  const variants: Record<string, string> = {
     default: 'bg-white rounded-lg shadow-sm',
     bordered: 'border border-gray-200 rounded-lg',
     flush: ''
   }
-  
-  return variants[props.variant] || variants.default
+  return variants[props.variant as string] || variants.default
 })
 
-const buttonClasses = (open) => {
-  const sizeClasses = {
+const buttonClasses = (open: boolean) => {
+  const sizeClasses: Record<string, string> = {
     sm: 'px-3 py-2 text-sm',
     md: 'px-4 py-3 text-sm',
     lg: 'px-6 py-4 text-base'
   }
-  
   const baseClasses = [
     'flex w-full items-center justify-between text-left transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500',
-    sizeClasses[props.size] || sizeClasses.md
+    sizeClasses[props.size as string] || sizeClasses.md
   ]
-  
-  const variants = {
+  const variants: Record<string, string> = {
     default: 'hover:bg-gray-50 rounded-lg',
     bordered: 'hover:bg-gray-50 rounded-t-lg',
     flush: 'hover:bg-gray-50 border-b border-gray-200'
   }
-  
-  const openClasses = {
+  const openClasses: Record<string, string> = {
     default: open ? 'bg-gray-50' : '',
     bordered: open ? 'bg-gray-50 border-b border-gray-200' : '',
     flush: ''
   }
-  
   return [
     ...baseClasses,
-    variants[props.variant] || variants.default,
-    openClasses[props.variant] || openClasses.default
+    variants[props.variant as string] || variants.default,
+    openClasses[props.variant as string] || openClasses.default
   ].filter(Boolean).join(' ')
 }
 
-const iconClasses = (open) => {
+const iconClasses = (open: boolean) => {
   return [
     'h-5 w-5 transition-transform duration-200',
     open ? 'rotate-180' : '',
@@ -115,23 +118,21 @@ const iconClasses = (open) => {
 }
 
 const panelClasses = computed(() => {
-  const sizeClasses = {
+  const sizeClasses: Record<string, string> = {
     sm: 'px-3 pb-2',
     md: 'px-4 pb-3',
     lg: 'px-6 pb-4'
   }
-  
-  const variants = {
+  const variants: Record<string, string> = {
     default: 'text-gray-700',
     bordered: 'text-gray-700 border-t border-gray-200',
     flush: 'text-gray-700'
   }
-  
   return [
-    sizeClasses[props.size] || sizeClasses.md,
-    variants[props.variant] || variants.default
+    sizeClasses[props.size as string] || sizeClasses.md,
+    variants[props.variant as string] || variants.default
   ].join(' ')
 })
-</script> 
+</script>
 
- 
+

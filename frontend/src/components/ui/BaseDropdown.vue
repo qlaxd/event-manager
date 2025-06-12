@@ -1,14 +1,14 @@
 <template>
-  <Menu as="div" class="relative inline-block text-left">
+  <Menu as="div" class="relative inline-block text-left" v-slot="{ open }">
     <div>
       <MenuButton :class="triggerClasses" @click="handleToggle">
         <slot name="trigger">
           <span>{{ triggerText }}</span>
-          <svg 
+          <svg
             class="ml-2 -mr-1 h-5 w-5 transition-transform"
             :class="{ 'rotate-180': open }"
-            fill="none" 
-            stroke="currentColor" 
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -46,20 +46,20 @@ const props = defineProps({
   position: {
     type: String,
     default: 'bottom-right',
-    validator: (value) => [
+    validator: (value: unknown) => [
       'bottom-left', 'bottom-right', 'top-left', 'top-right',
       'left', 'right'
-    ].includes(value)
+    ].includes(value as string)
   },
   triggerVariant: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'ghost', 'outline'].includes(value)
+    validator: (value: unknown) => ['default', 'ghost', 'outline'].includes(value as string)
   },
   width: {
     type: String,
     default: 'auto',
-    validator: (value) => ['auto', 'trigger', 'sm', 'md', 'lg'].includes(value)
+    validator: (value: unknown) => ['auto', 'trigger', 'sm', 'md', 'lg'].includes(value as string)
   }
 })
 
@@ -69,23 +69,23 @@ const handleToggle = () => {
   emit('toggle')
 }
 
-const triggerClasses = computed(() => {
+const triggerClasses = computed<string>(() => {
   const baseClasses = 'inline-flex w-full justify-center items-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2'
-  
-  const variants = {
+
+  const variants: Record<string, string> = {
     default: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 focus:ring-primary-500',
     ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
     outline: 'border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-50 focus:ring-primary-500'
   }
-  
+
   return [baseClasses, variants[props.triggerVariant] || variants.default].join(' ')
 })
 
-const menuClasses = computed(() => {
+const menuClasses = computed<string>(() => {
   const baseClasses = 'absolute z-10 bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
-  
+
   // Position classes
-  const positionClasses = {
+  const positionClasses: Record<string, string> = {
     'bottom-left': 'left-0 mt-2 origin-top-left',
     'bottom-right': 'right-0 mt-2 origin-top-right',
     'top-left': 'left-0 bottom-full mb-2 origin-bottom-left',
@@ -93,22 +93,22 @@ const menuClasses = computed(() => {
     'left': 'right-full mr-2 top-0 origin-top-right',
     'right': 'left-full ml-2 top-0 origin-top-left'
   }
-  
+
   // Width classes
-  const widthClasses = {
+  const widthClasses: Record<string, string> = {
     auto: 'min-w-max',
     trigger: 'w-full',
     sm: 'w-48',
     md: 'w-56',
     lg: 'w-64'
   }
-  
+
   return [
     baseClasses,
     positionClasses[props.position] || positionClasses['bottom-right'],
     widthClasses[props.width] || widthClasses.auto
   ].join(' ')
 })
-</script> 
+</script>
 
- 
+

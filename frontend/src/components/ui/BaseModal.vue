@@ -83,9 +83,9 @@ const props = defineProps({
     default: ''
   },
   size: {
-    type: String,
+    type: String as () => 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full',
     default: 'md',
-    validator: (value) => ['xs', 'sm', 'md', 'lg', 'xl', '2xl', 'full'].includes(value)
+    validator: (value: unknown) => typeof value === 'string' && ['xs', 'sm', 'md', 'lg', 'xl', '2xl', 'full'].includes(value)
   },
   closable: {
     type: Boolean,
@@ -96,9 +96,9 @@ const props = defineProps({
     default: false
   },
   position: {
-    type: String,
+    type: String as () => 'center' | 'top',
     default: 'center',
-    validator: (value) => ['center', 'top'].includes(value)
+    validator: (value: unknown) => typeof value === 'string' && ['center', 'top'].includes(value)
   },
   padding: {
     type: Boolean,
@@ -116,19 +116,19 @@ const handleClose = () => {
 }
 
 const containerClasses = computed(() => {
-  const positionClasses = {
+  const positionClasses: Record<'center' | 'top', string> = {
     center: 'flex min-h-full items-center justify-center',
     top: 'flex min-h-full items-start justify-center pt-16'
   }
-  
+
   return [
     'p-4 text-center',
-    positionClasses[props.position] || positionClasses.center
+    positionClasses[props.position as 'center' | 'top'] || positionClasses.center
   ].join(' ')
 })
 
 const panelClasses = computed(() => {
-  const sizeClasses = {
+  const sizeClasses: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full', string> = {
     xs: 'max-w-xs',
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -140,13 +140,13 @@ const panelClasses = computed(() => {
 
   return [
     'w-full transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all',
-    sizeClasses[props.size] || sizeClasses.md
+    sizeClasses[props.size as 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'] || sizeClasses.md
   ].join(' ')
 })
 
 const bodyClasses = computed(() => {
   return props.padding ? 'p-6' : ''
 })
-</script> 
+</script>
 
- 
+

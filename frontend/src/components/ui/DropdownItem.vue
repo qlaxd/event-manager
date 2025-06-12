@@ -8,8 +8,14 @@
       @click="handleClick"
     >
       <slot name="icon" />
-      <span class="flex-1">{{ text || $slots.default?.[0]?.children }}</span>
-      <slot />
+      <span class="flex-1">
+        <template v-if="$slots.default">
+          <slot />
+        </template>
+        <template v-else>
+          {{ text }}
+        </template>
+      </span>
       <slot name="shortcut" />
     </component>
   </MenuItem>
@@ -40,7 +46,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'danger'].includes(value)
+    validator: (value: string) => ['default', 'danger'].includes(value)
   }
 })
 
@@ -54,17 +60,19 @@ const component = computed(() => {
 
 const itemDisabled = computed(() => props.disabled)
 
-const handleClick = (event) => {
+const handleClick = (event: MouseEvent) => {
   if (!props.disabled) {
     emit('click', event)
   }
 }
 
-const itemClasses = (active, disabled) => {
+type Variant = 'default' | 'danger'
+
+const itemClasses = (active: boolean, disabled: boolean) => {
   const baseClasses = 'group flex items-center w-full px-4 py-2 text-sm transition-colors'
-  
+
   // Variant-specific classes
-  const variantClasses = {
+  const variantClasses: Record<Variant, { normal: string; active: string; disabled: string }> = {
     default: {
       normal: 'text-gray-700',
       active: 'bg-gray-100 text-gray-900',
@@ -76,9 +84,9 @@ const itemClasses = (active, disabled) => {
       disabled: 'text-red-400 cursor-not-allowed'
     }
   }
-  
-  const variant = variantClasses[props.variant] || variantClasses.default
-  
+
+  const variant = variantClasses[props.variant as Variant] || variantClasses.default
+
   let stateClasses = ''
   if (disabled) {
     stateClasses = variant.disabled
@@ -87,9 +95,9 @@ const itemClasses = (active, disabled) => {
   } else {
     stateClasses = variant.normal
   }
-  
+
   return [baseClasses, stateClasses].join(' ')
 }
-</script> 
+</script>
 
- 
+

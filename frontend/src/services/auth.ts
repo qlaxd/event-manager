@@ -58,20 +58,18 @@ class AuthService {
   async enableMFA(password: string): Promise<{
     secret: string
     qr_code: string
-    backup_codes: string[]
   }> {
     const response = await apiClient.post<{
       secret: string
       qr_code: string
-      backup_codes: string[]
     }>('/auth/mfa/enable', {
       password
     });
     return response.data;
   }
 
-  async verifyMFASetup(mfaCode: string): Promise<{ message: string }> {
-    const response = await apiClient.post<{ message: string }>('/auth/mfa/verify', {
+  async verifyMFASetup(mfaCode: string): Promise<{ backup_codes: string[] }> {
+    const response = await apiClient.post<{ backup_codes: string[] }>('/auth/mfa/verify', {
       mfa_code: mfaCode
     });
     return response.data;

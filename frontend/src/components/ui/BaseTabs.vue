@@ -1,6 +1,6 @@
 <template>
-  <TabGroup 
-    :selectedIndex="selectedIndex" 
+  <TabGroup
+    :selectedIndex="selectedIndex"
     @change="handleChange"
     :vertical="vertical"
     as="div"
@@ -10,8 +10,7 @@
       <Tab
         v-for="(tab, index) in tabs"
         :key="index"
-        v-slot="{ selected }"
-        :class="tabClasses(selected)"
+        :class="tabClasses(index === (selectedIndex ?? 0))"
         :disabled="tab.disabled"
       >
         {{ tab.label }}
@@ -36,42 +35,25 @@
 import { computed } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 
-const props = defineProps({
-  tabs: {
-    type: Array,
-    required: true,
-    validator: (tabs) => tabs.every(tab => 
-      typeof tab === 'object' && 
-      typeof tab.label === 'string'
-    )
-  },
-  selectedIndex: {
-    type: Number,
-    default: 0
-  },
-  variant: {
-    type: String,
-    default: 'default',
-    validator: (value) => ['default', 'pills', 'underline'].includes(value)
-  },
-  size: {
-    type: String,
-    default: 'md',
-    validator: (value) => ['sm', 'md', 'lg'].includes(value)
-  },
-  vertical: {
-    type: Boolean,
-    default: false
-  },
-  fullWidth: {
-    type: Boolean,
-    default: false
-  }
-})
+interface TabItem {
+  label: string
+  content?: string
+  disabled?: boolean
+  [key: string]: any
+}
+
+const props = defineProps<{
+  tabs: TabItem[]
+  selectedIndex?: number
+  variant?: 'default' | 'pills' | 'underline'
+  size?: 'sm' | 'md' | 'lg'
+  vertical?: boolean
+  fullWidth?: boolean
+}>()
 
 const emit = defineEmits(['change'])
 
-const handleChange = (index) => {
+const handleChange = (index: number) => {
   emit('change', index)
 }
 
@@ -84,45 +66,45 @@ const containerClasses = computed(() => {
 
 const tabListClasses = computed(() => {
   const baseClasses = 'flex'
-  
+
   if (props.vertical) {
     return `${baseClasses} flex-col space-y-1 min-w-max`
   }
-  
-  const variantClasses = {
+
+  const variantClasses: Record<string, string> = {
     default: 'border-b border-gray-200',
     pills: 'bg-gray-100 p-1 rounded-lg',
     underline: 'border-b border-gray-200'
   }
-  
+
   const widthClasses = props.fullWidth ? 'w-full' : ''
-  
+
   return [
     baseClasses,
-    variantClasses[props.variant] || variantClasses.default,
+    variantClasses[props.variant || 'default'],
     widthClasses,
     props.vertical ? '' : 'space-x-1'
   ].filter(Boolean).join(' ')
 })
 
-const tabClasses = (selected) => {
-  const sizeClasses = {
+const tabClasses = (selected: boolean) => {
+  const sizeClasses: Record<string, string> = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-sm',
     lg: 'px-6 py-3 text-base'
   }
-  
+
   const baseClasses = [
     'font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500',
-    sizeClasses[props.size] || sizeClasses.md
+    sizeClasses[props.size || 'md']
   ]
-  
+
   if (props.fullWidth && !props.vertical) {
     baseClasses.push('flex-1')
   }
-  
+
   // Variant-specific styling
-  const variantClasses = {
+  const variantClasses: Record<string, { base: string; selected: string; unselected: string }> = {
     default: {
       base: 'border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300',
       selected: 'text-primary-600 border-primary-500',
@@ -139,9 +121,9 @@ const tabClasses = (selected) => {
       unselected: 'text-gray-500'
     }
   }
-  
-  const variant = variantClasses[props.variant] || variantClasses.default
-  
+
+  const variant = variantClasses[props.variant || 'default']
+
   return [
     ...baseClasses,
     variant.base,
@@ -159,6 +141,6 @@ const panelsClasses = computed(() => {
 const panelClasses = computed(() => {
   return 'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-md'
 })
-</script> 
+</script>
 
- 
+

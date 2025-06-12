@@ -26,7 +26,7 @@
               <p>{{ message }}</p>
             </slot>
           </div>
-          
+
           <!-- Actions -->
           <div v-if="$slots.actions" class="mt-4">
             <div class="flex">
@@ -58,11 +58,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+type Variant = 'success' | 'warning' | 'error' | 'info'
+
 const props = defineProps({
   variant: {
     type: String,
     default: 'info',
-    validator: (value) => ['success', 'warning', 'error', 'info'].includes(value)
+    validator: (value: unknown) => typeof value === 'string' && ['success', 'warning', 'error', 'info'].includes(value)
   },
   title: {
     type: String,
@@ -98,77 +100,77 @@ const iconComponent = computed(() => {
 })
 
 const alertClasses = computed(() => {
-  const variants = {
+  const variants: Record<Variant, string> = {
     success: 'bg-green-50 border-green-200',
-    warning: 'bg-yellow-50 border-yellow-200', 
+    warning: 'bg-yellow-50 border-yellow-200',
     error: 'bg-red-50 border-red-200',
     info: 'bg-blue-50 border-blue-200'
   }
-  
+
   return [
     'rounded-md border p-4',
-    variants[props.variant] || variants.info
+    variants[props.variant as Variant] || variants.info
   ].join(' ')
 })
 
 const iconClasses = computed(() => {
-  const variants = {
+  const variants: Record<Variant, string> = {
     success: 'text-green-400',
     warning: 'text-yellow-400',
-    error: 'text-red-400', 
+    error: 'text-red-400',
     info: 'text-blue-400'
   }
-  
+
   return [
     'h-5 w-5',
-    variants[props.variant] || variants.info
+    variants[props.variant as Variant] || variants.info
   ].join(' ')
 })
 
 const titleClasses = computed(() => {
-  const variants = {
+  const variants: Record<Variant, string> = {
     success: 'text-green-800',
     warning: 'text-yellow-800',
     error: 'text-red-800',
     info: 'text-blue-800'
   }
-  
+
   return [
     'text-sm font-medium',
-    variants[props.variant] || variants.info
+    variants[props.variant as Variant] || variants.info
   ].join(' ')
 })
 
 const messageClasses = computed(() => {
-  const variants = {
+  const variants: Record<Variant, string> = {
     success: 'text-green-700',
-    warning: 'text-yellow-700', 
+    warning: 'text-yellow-700',
     error: 'text-red-700',
     info: 'text-blue-700'
   }
-  
+
   const marginClass = props.title ? 'mt-1' : ''
-  
+
   return [
     'text-sm',
     marginClass,
-    variants[props.variant] || variants.info
+    variants[props.variant as Variant] || variants.info
   ].join(' ')
 })
 
 const closeButtonClasses = computed(() => {
-  const variants = {
+  const variants: Record<Variant, string> = {
     success: 'text-green-400 hover:text-green-600 focus:ring-green-600',
     warning: 'text-yellow-400 hover:text-yellow-600 focus:ring-yellow-600',
-    error: 'text-red-400 hover:text-red-600 focus:ring-red-600', 
+    error: 'text-red-400 hover:text-red-600 focus:ring-red-600',
     info: 'text-blue-400 hover:text-blue-600 focus:ring-blue-600'
   }
-  
+
   return [
     'inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2',
-    variants[props.variant] || variants.info
+    variants[props.variant as Variant] || variants.info
   ].join(' ')
 })
-</script> 
+</script>
 
- 
+
