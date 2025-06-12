@@ -80,11 +80,11 @@ Refresh an expired access token using a refresh token.
 
 **Request:**
 
-```json
-{
-  "grant_type": "refresh_token",
-  "refresh_token": "def502008b14e1e6b9b9c7a5c9e5f6a2b1c3d4e5f6..."
-}
+- The refresh token is sent automatically by the browser as a secure, HttpOnly cookie named `refresh_token`. No body is required.
+
+```http
+POST /auth/refresh HTTP/1.1
+Cookie: refresh_token=def502008b14e1e6b9b9c7a5c9e5f6a2b1c3d4e5f6...
 ```
 
 **Response (200 OK):**

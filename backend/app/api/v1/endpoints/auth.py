@@ -6,7 +6,7 @@ password reset functionality, and comprehensive security measures.
 """
 
 import structlog
-from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Request, status, HTTPException, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from slowapi import Limiter
@@ -69,19 +69,21 @@ async def login_for_access_token(
 @limiter.limit("10/minute")
 async def refresh_access_token(
     request: Request,
-    token_data: TokenRefreshRequest,
+    refresh_token: str = Cookie(None, alias="refresh_token"),
     db: AsyncSession = Depends(get_async_session)
 ):
     """
-    Refresh expired access token using refresh token.
+    Refresh expired access token using refresh token from HttpOnly cookie.
     
     Validates refresh token and issues new access/refresh token pair.
     """
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token cookie found.")
     refreshed_token_data = await AuthService.refresh_token(
         db=db,
         request=request,
         ip_address=get_remote_address(request),
-        refresh_token=token_data.refresh_token,
+        refresh_token=refresh_token,
     )
     return TokenResponse(**refreshed_token_data)
 

@@ -295,8 +295,7 @@ class AuthService:
         refresh_token: str,
     ):
         """
-        Handles refresh token validation and issues a new token pair.
-        Implements refresh token rotation for enhanced security.
+        Handles refresh token logic. Accepts the token from the cookie, not the body.
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -517,4 +516,3 @@ class AuthService:
             ip_address=ip_address,
             details={"revoked_jti": jti},
         )
-        
