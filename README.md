@@ -25,7 +25,7 @@ A secure, modern, multi-user event management platform with integrated helpdesk 
 
 ## Overview
 
-**UCC Event Manager** is a full-stack web application for managing personal events, featuring robust authentication (OAuth2, JWT, MFA), a helpdesk chatbot (with escalation and voice support), and enterprise-grade security. The system is designed for both end-users and administrators, with a focus on usability, compliance, and extensibility.
+**UCC Event Manager** is a full-stack web application for managing personal events with agentic AI capabilities, featuring robust authentication (OAuth2, JWT, MFA), a helpdesk chatbot (with escalation and voice support), and enterprise-grade security. The system is designed for both end-users and administrators, with a focus on usability, compliance, and extensibility.
 
 ---
 
@@ -74,7 +74,7 @@ A secure, modern, multi-user event management platform with integrated helpdesk 
 - Vue 3, Vite, TypeScript, Pinia, Vue Router, Tailwind CSS, Headless UI, Heroicons, Axios, Cypress, Vitest
 
 **Backend:**
-- FastAPI, Uvicorn, SQLAlchemy, Alembic, PostgreSQL, Redis, Pydantic, Passlib, PyJWT, PyOTP, slowapi, aiosmtplib, Rasa, Twilio (optional), Docker
+- FastAPI, Uvicorn, SQLAlchemy, Alembic, PostgreSQL, Redis, Pydantic, Passlib, PyJWT, PyOTP, slowapi, aiosmtplib, Rasa, Twilio (optional), Docker, Ollama, Llama3:8b quantized model
 
 **DevOps:**
 - Docker Compose, Nginx, Poetry, GitHub Actions
