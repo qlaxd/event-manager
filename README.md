@@ -1,4 +1,4 @@
-# UCC Event Manager
+# Event Manager
 
 A secure, modern, multi-user event management platform with integrated helpdesk chatbot and optional voice support. Built for security, scalability, and a seamless user experience.
 
@@ -25,7 +25,7 @@ A secure, modern, multi-user event management platform with integrated helpdesk 
 
 ## Overview
 
-**UCC Event Manager** is a full-stack web application for managing personal events with agentic AI capabilities, featuring robust authentication (OAuth2, JWT, MFA), a helpdesk chatbot (with escalation and voice support), and enterprise-grade security. The system is designed for both end-users and administrators, with a focus on usability, compliance, and extensibility.
+**Event Manager** is a full-stack web application for managing personal events with agentic AI capabilities, featuring robust authentication (OAuth2, JWT, MFA), a helpdesk chatbot (with escalation and voice support), and enterprise-grade security. The system is designed for both end-users and administrators, with a focus on usability, compliance, and extensibility.
 
 ---
 
